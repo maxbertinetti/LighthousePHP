@@ -16,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo lh_e($data['title'] ?? 'Lighthouse') ?></title>
     <meta name="description" content="<?php echo lh_e($data['description'] ?? '') ?>">
+    <link rel="stylesheet" href="/assets/css/default.css">
 </head>
 
 <body>
@@ -24,6 +25,7 @@
         <?php echo $page_content ?>
     </main>
     <?php echo lh_partial('footer', $data) ?>
+    <script src="/assets/js/default.js"></script>
 </body>
 
 </html>
