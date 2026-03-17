@@ -1,0 +1,44 @@
+# Lighthouse PHP Framework .gitignore
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+*.swp
+*.bak
+*~
+
+# Composer (not used, but common)
+vendor/
+composer.lock
+
+# Node (if present for frontend)
+node_modules/
+
+# Cache and runtime
+/cache/*
+!/cache/.gitkeep
+
+# Logs
+*.log
+
+# Environment/config
+.env
+.env.*
+/config/*.local.php
+
+# Tests output
+/tests/output/
+
+# Ignore build artifacts
+/public/assets/build/
+
+# Ignore user uploads (if any)
+/public/uploads/
