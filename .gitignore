@@ -33,6 +33,10 @@ node_modules/
 .env
 .env.*
 /config/*.local.php
+/config/database.php
+/data/
+*.sqlite
+*.sqlite3
 
 # Tests output
 /tests/output/

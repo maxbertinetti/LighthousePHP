@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * Database Configuration Example
+ *
+ * Copy this file to database.php and configure your database connection.
+ */
+
+// SQLite example
+lh_db_connect('sqlite:' . __DIR__ . '/../data/database.sqlite');
+
+// MySQL example
+// lh_db_connect(
+//     'mysql:host=localhost;dbname=lighthouse',
+//     'root',
+//     'password'
+// );
+
+// PostgreSQL example
+// lh_db_connect(
+//     'pgsql:host=localhost;dbname=lighthouse',
+//     'postgres',
+//     'password'
+// );

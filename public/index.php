@@ -2,6 +2,8 @@
 // Lighthouse PHP Framework Entry Point
 
 require_once __DIR__ . '/../core/http.php';
+require_once __DIR__ . '/../core/layout.php';
+require_once __DIR__ . '/../core/db.php';
 
 // --- URL ---
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -37,6 +39,11 @@ if ($method === 'GET' || $method === 'HEAD') {
 // --- Execute ---
 ob_start();
 require $resolved;
-$output = ob_get_clean();
+$content = ob_get_clean();
 
-echo $output;
+// Apply layout if page is not 404 without layout
+if ($resolved !== $baseDir . '/404.php') {
+    $content = lh_layout($content);
+}
+
+echo $content;

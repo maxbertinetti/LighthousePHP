@@ -23,10 +23,10 @@
 - Query helpers
 - Transactions
 
-## Phase 5 — Migrations
-- SQL file parser
-- CLI migrate up/down
-- Migration tracking
+## Phase 5 — Frontend
+- default.css (PicoCSS fork)
+- Hamburger menu
+- default.js
 
 ## Phase 6 — Authentication
 - Session auth
@@ -39,17 +39,17 @@
 - Assertions
 - HTTP test utilities
 
-## Phase 8 — Frontend
-- default.css (PicoCSS fork)
-- Hamburger menu
-- default.js
-
-## Phase 9 — CLI
+## Phase 8 — CLI
 - Project generator
 - Command parsing
 - Serve command
 - Migrate command
 - Test command
+
+## Phase 9 — Migrations
+- SQL file parser
+- CLI migrate up/down
+- Migration tracking
 
 ## Phase 10 — Cache System
 - File cache engine
