@@ -21,7 +21,6 @@ lh_set_data([
         </p>
     </article>
     <figure>
-        <img src="/assets/img/logo.svg" alt="Lighthouse logo">
-        <figcaption>The framework identity rendered as responsive media.</figcaption>
+        <img src="/assets/img/Logo.png" alt="Lighthouse logo">
     </figure>
 </section>

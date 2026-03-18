@@ -11,6 +11,56 @@
 $lh_db_connection = null;
 
 /**
+ * Build a PDO DSN from the current configuration contract.
+ *
+ * @return string
+ */
+function lh_db_dsn(): string
+{
+    $driver = (string) lh_config('database.driver');
+
+    if ($driver === 'sqlite') {
+        $path = (string) lh_config('database.sqlite_path');
+        $root = dirname(__DIR__);
+
+        return 'sqlite:' . $root . '/' . ltrim($path, '/');
+    }
+
+    $host = (string) lh_config('database.host');
+    $port = lh_config('database.port');
+    $name = (string) lh_config('database.name');
+    $charset = (string) lh_config('database.charset', 'utf8mb4');
+
+    if ($driver === 'pgsql') {
+        return "pgsql:host={$host};port={$port};dbname={$name}";
+    }
+
+    return "mysql:host={$host};port={$port};dbname={$name};charset={$charset}";
+}
+
+/**
+ * Connect using the loaded application configuration.
+ *
+ * @return void
+ */
+function lh_db_connect_from_config(): void
+{
+    $dsn = lh_db_dsn();
+    $driver = (string) lh_config('database.driver');
+
+    if ($driver === 'sqlite') {
+        lh_db_connect($dsn);
+        return;
+    }
+
+    lh_db_connect(
+        $dsn,
+        (string) lh_config('database.username'),
+        (string) lh_config('database.password')
+    );
+}
+
+/**
  * Connect to the database.
  *
  * @param string $dsn      PDO Data Source Name (e.g., 'sqlite:/path/to/db.sqlite')

@@ -1,0 +1,4 @@
+main > section:first-of-type:has(> article + figure) > figure img {
+    border-radius: 0;
+    box-shadow: none;
+}

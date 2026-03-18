@@ -28,6 +28,27 @@
 - Hamburger menu
 - default.js
 
+## Phase 5a — Configuration & Development Mode
+- Adopt native INI files as the primary configuration format
+- Add `config/config.ini.example` as the committed configuration contract
+- Define required base sections such as `[database]` and `[mail]`
+- Define rules for project-specific sections such as `[stripe]`
+- Ensure `config.ini.example` is never used as a runtime fallback
+- Enforce `config.ini.example` as a strict contract with no extra keys allowed
+- Introduce environment detection / `APP_ENV`
+- Map `lighthousephp serve` to `config/config.development.ini`
+- Map `lighthousephp test` to `config/config.testing.ini`
+- Make bootstrap fail fast when the environment config file is missing
+- Expose configuration through `lh_config('section.key')`
+- Load configuration once during bootstrap
+- Add development mode defaults
+- Disable HTTP caching in development
+- Disable ETag / 304 responses in development
+- Define dev/testing/staging/production behavior for headers and debugging
+- Define GitHub Actions generation of `config/config.staging.ini` and `config/config.production.ini`
+- Define build-time injection of staging/production config into FrankenPHP executables
+- Document local development workflow with FrankenPHP
+
 ## Phase 6 — Authentication
 - Session auth
 - Login/logout

@@ -2,8 +2,13 @@
 // Lighthouse PHP Framework Entry Point
 
 require_once __DIR__ . '/../core/http.php';
+require_once __DIR__ . '/../core/config.php';
 require_once __DIR__ . '/../core/layout.php';
 require_once __DIR__ . '/../core/db.php';
+
+lh_load_config();
+lh_apply_environment_defaults();
+lh_db_connect_from_config();
 
 // --- URL ---
 $uri = $_SERVER['REQUEST_URI'] ?? '/';

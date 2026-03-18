@@ -50,6 +50,10 @@ function lh_content_type($type = 'text/html; charset=UTF-8')
  */
 function lh_send_etag($etag)
 {
+    if (lh_is_env('development')) {
+        return;
+    }
+
     lh_header('ETag', $etag);
 
     if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
@@ -73,6 +77,11 @@ function lh_send_etag($etag)
  */
 function lh_send_cache_control($ttl = 60, $public = true)
 {
+    if (lh_is_env('development')) {
+        lh_no_cache();
+        return;
+    }
+
     $type = $public ? 'public' : 'private';
     lh_header('Cache-Control', "$type, max-age=" . intval($ttl));
 }

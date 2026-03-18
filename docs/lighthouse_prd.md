@@ -18,6 +18,36 @@ Lighthouse is a procedural PHP framework with zero OOP and no Composer dependenc
 
 ## 4. Architecture
 
+### 4.0 Configuration
+Lighthouse uses native PHP INI configuration files instead of `.env` as the primary configuration format.
+
+Configuration files:
+- `config/config.ini.example` committed in the repository as the configuration contract
+- `config/config.development.ini` for local development
+- `config/config.testing.ini` for test runs
+- `config/config.staging.ini` for staging builds
+- `config/config.production.ini` for production builds
+
+Rules:
+- `config.ini.example` contains all expected sections and keys with fake but realistic values
+- optional project integrations add their own sections (for example `[stripe]`)
+- `config.ini.example` is documentation and template only, never a runtime fallback
+- `config.ini.example` is a strict contract: environment files must contain the exact same sections and keys
+- missing environment config must fail fast with a clear error
+- extra keys are not allowed
+- runtime configuration is selected by environment, not by manually copying files
+
+Environment selection:
+- `lighthousephp serve` uses `config/config.development.ini`
+- `lighthousephp test` uses `config/config.testing.ini`
+- CI/CD generates `config/config.staging.ini` and `config/config.production.ini` dynamically before building the FrankenPHP executable
+
+FrankenPHP deployment model:
+- staging and production builds are environment-specific artifacts
+- sensitive values are injected during CI build time
+- the final executable contains the resolved configuration for its target environment
+- deployment ships the built artifact, not a separate runtime config workflow
+
 ### 4.1 Routing
 Each URL maps directly to a PHP file in `/pages`.
 
@@ -124,6 +154,13 @@ Commands:
 - test
 - lighthouse-check
 - preflight
+
+Behavior:
+- `serve` resolves the application in `development` mode
+- `test` resolves the application in `testing` mode
+- the CLI sets the environment context and the application bootstrap loads the matching INI file
+- the CLI does not use `config.ini.example` as runtime configuration
+- configuration is loaded once and read via `lh_config('section.key')`
 
 ## 13. Testing
 
