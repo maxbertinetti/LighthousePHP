@@ -12,6 +12,7 @@ $lh_cli_streams = [
 ];
 
 $lh_cli_root_override = null;
+$lh_cli_binary_name = null;
 
 /**
  * Override CLI streams, primarily for tests.
@@ -73,6 +74,41 @@ function lh_cli_set_root(?string $root): void
 
     $lh_cli_root_override = $root;
     lh_config_set_base_dir($root === null ? null : rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'config');
+}
+
+/**
+ * Set the visible CLI binary name.
+ *
+ * @param string|null $name
+ * @return void
+ */
+function lh_cli_set_binary_name(?string $name): void
+{
+    global $lh_cli_binary_name;
+
+    $lh_cli_binary_name = $name;
+}
+
+/**
+ * Return the visible CLI binary name.
+ *
+ * @return string
+ */
+function lh_cli_binary_name(): string
+{
+    global $lh_cli_binary_name;
+
+    if (is_string($lh_cli_binary_name) && $lh_cli_binary_name !== '') {
+        return $lh_cli_binary_name;
+    }
+
+    $fromEnv = getenv('LIGHTHOUSE_CLI_BINARY');
+
+    if (is_string($fromEnv) && $fromEnv !== '') {
+        return $fromEnv;
+    }
+
+    return 'lighthousephp';
 }
 
 /**
@@ -164,9 +200,11 @@ function lh_cli_parse_options(array $arguments): array
  */
 function lh_cli_help(): void
 {
+    $binary = lh_cli_binary_name();
+
     lh_cli_out('Lighthouse CLI');
     lh_cli_out('');
-    lh_cli_out('Usage: lighthousephp <command> [options]');
+    lh_cli_out("Usage: {$binary} <command> [options]");
     lh_cli_out('');
     lh_cli_out('Commands:');
     lh_cli_out('  new <path>            Create a new Lighthouse project scaffold');
@@ -464,6 +502,11 @@ function lh_cli_command_migrate(array $options, array $args): int
 function lh_cli_main(array $argv): int
 {
     $arguments = $argv;
+    if (getenv('LIGHTHOUSE_CLI_BINARY') === false || getenv('LIGHTHOUSE_CLI_BINARY') === '') {
+        lh_cli_set_binary_name(basename((string) ($arguments[0] ?? 'lighthousephp')));
+    } else {
+        lh_cli_set_binary_name((string) getenv('LIGHTHOUSE_CLI_BINARY'));
+    }
     array_shift($arguments);
 
     $command = $arguments[0] ?? 'help';

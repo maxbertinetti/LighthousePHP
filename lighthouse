@@ -1,0 +1,165 @@
+#!/bin/sh
+set -eu
+
+read_metadata() {
+    metadata_file=$1
+
+    if [ -f "$metadata_file" ]; then
+        # shellcheck disable=SC1090
+        . "$metadata_file"
+    fi
+}
+
+show_help() {
+    printf '%s\n' "Lighthouse CLI"
+    printf '\n'
+    printf '%s\n' "Usage: lighthouse <command> [options]"
+    printf '\n'
+    printf '%s\n' "Global Commands:"
+    printf '%s\n' "  help                  Show this help message"
+    printf '%s\n' "  version               Show the installed Lighthouse version"
+    printf '%s\n' "  update-available      Check whether a newer version is available"
+    printf '%s\n' "  self-update           Download and install the latest configured version"
+    printf '%s\n' "  uninstall             Remove the global Lighthouse installation"
+    printf '\n'
+    printf '%s\n' "Project Commands:"
+    printf '%s\n' "  new <path>            Create a new Lighthouse project scaffold"
+    printf '%s\n' "  serve                 Start the app in development mode"
+    printf '%s\n' "  test                  Run the Lighthouse test suite"
+    printf '%s\n' "  migrate status        Show migration status"
+    printf '%s\n' "  migrate up            Apply pending migrations"
+    printf '%s\n' "  migrate down          Roll back migrations"
+}
+
+find_project_root() {
+    current_dir=$PWD
+
+    while [ "$current_dir" != "/" ]; do
+        if [ -f "$current_dir/lighthousephp" ] && [ -d "$current_dir/core" ] && [ -d "$current_dir/public" ] && [ -d "$current_dir/config" ]; then
+            printf '%s\n' "$current_dir"
+            return 0
+        fi
+
+        current_dir=$(dirname "$current_dir")
+    done
+
+    return 1
+}
+
+if [ "${LIGHTHOUSE_HOME:-}" = "" ]; then
+    LIGHTHOUSE_HOME=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+    export LIGHTHOUSE_HOME
+fi
+
+LIGHTHOUSE_SHARE_ROOT=$(dirname "$LIGHTHOUSE_HOME")
+LIGHTHOUSE_METADATA_FILE=${LIGHTHOUSE_METADATA_FILE:-"$LIGHTHOUSE_SHARE_ROOT/metadata.env"}
+read_metadata "$LIGHTHOUSE_METADATA_FILE"
+
+remote_version() {
+    if [ "${LIGHTHOUSE_DOWNLOAD_URL:-}" != "" ]; then
+        return 1
+    fi
+
+    if [ "${LIGHTHOUSE_REPO:-}" = "" ]; then
+        return 1
+    fi
+
+    ref=${LIGHTHOUSE_REF:-main}
+    curl -fsSL "https://raw.githubusercontent.com/$LIGHTHOUSE_REPO/$ref/VERSION"
+}
+
+show_version() {
+    local_version=$(cat "$LIGHTHOUSE_HOME/VERSION")
+    printf '%s\n' "Lighthouse $local_version"
+}
+
+show_update_available() {
+    local_version=$(cat "$LIGHTHOUSE_HOME/VERSION")
+    latest_version=$(remote_version 2>/dev/null || true)
+
+    if [ -z "$latest_version" ]; then
+        printf '%s\n' "Update check unavailable for this installation."
+        return 0
+    fi
+
+    if [ "$latest_version" = "$local_version" ]; then
+        printf '%s\n' "Lighthouse is up to date ($local_version)."
+        return 0
+    fi
+
+    printf '%s\n' "Update available: $local_version -> $latest_version"
+    return 0
+}
+
+self_update() {
+    install_url=${LIGHTHOUSE_INSTALL_URL:-}
+
+    if [ -n "$install_url" ]; then
+        LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
+        LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
+        LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
+        LIGHTHOUSE_INSTALL_URL="$install_url" \
+        LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
+        LIGHTHOUSE_REF="${LIGHTHOUSE_REF:-main}" \
+        sh -c 'curl -fsSL "$LIGHTHOUSE_INSTALL_URL" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
+        return 0
+    fi
+
+    if [ -n "${LIGHTHOUSE_REPO:-}" ]; then
+        LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
+        LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
+        LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
+        LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
+        LIGHTHOUSE_REF="${LIGHTHOUSE_REF:-main}" \
+        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/${LIGHTHOUSE_REF}/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
+        return 0
+    fi
+
+    printf '%s\n' "This installation does not have update metadata." >&2
+    return 1
+}
+
+uninstall_lighthouse() {
+    LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
+    LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
+    LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
+    exec "$LIGHTHOUSE_HOME/remove.sh"
+}
+
+command_name=${1:-help}
+
+case "$command_name" in
+    version|--version|-v)
+        show_version
+        exit 0
+        ;;
+    update-available)
+        show_update_available
+        exit 0
+        ;;
+    self-update)
+        self_update
+        exit 0
+        ;;
+    uninstall|remove)
+        uninstall_lighthouse
+        exit 0
+        ;;
+    help|-h|--help)
+        show_help
+        exit 0
+        ;;
+    new)
+        export LIGHTHOUSE_CLI_BINARY=lighthouse
+        exec "$LIGHTHOUSE_HOME/lighthousephp" "$@"
+        ;;
+esac
+
+if project_root=$(find_project_root); then
+    unset LIGHTHOUSE_HOME
+    export LIGHTHOUSE_CLI_BINARY=lighthouse
+    exec "$project_root/lighthousephp" "$@"
+fi
+
+printf '%s\n' "Not inside a Lighthouse project. Use 'lighthouse new <path>' or run this command from a Lighthouse project directory." >&2
+exit 1

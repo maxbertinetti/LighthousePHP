@@ -12,6 +12,15 @@ return [
         lh_assert_contains('Usage: lighthousephp <command> [options]', $result['stdout']);
     }),
 
+    lh_test('cli help uses invoked binary name', function (): void {
+        $result = lh_capture_cli(function (): int {
+            return lh_cli_main(['lighthouse', 'help']);
+        });
+
+        lh_assert_same(0, $result['code']);
+        lh_assert_contains('Usage: lighthouse <command> [options]', $result['stdout']);
+    }),
+
     lh_test('cli serve dry run uses development router', function (): void {
         $result = lh_capture_cli(function (): int {
             return lh_cli_main(['lighthousephp', 'serve', '--dry-run', '--host=0.0.0.0', '--port=9090']);

@@ -38,9 +38,13 @@ Rules:
 - runtime configuration is selected by environment, not by manually copying files
 
 Environment selection:
-- `lighthousephp serve` uses `config/config.development.ini`
-- `lighthousephp test` uses `config/config.testing.ini`
+- `lighthousephp serve` and `lighthouse serve` use `config/config.development.ini`
+- `lighthousephp test` and `lighthouse test` use `config/config.testing.ini`
 - CI/CD generates `config/config.staging.ini` and `config/config.production.ini` dynamically before building the FrankenPHP executable
+
+Mail behavior:
+- development uses the configured SMTP server, with Mailpit as the intended local default
+- testing uses a file outbox for deterministic mail assertions
 
 FrankenPHP deployment model:
 - staging and production builds are environment-specific artifacts
@@ -78,6 +82,11 @@ Each file handles HTTP methods internally.
 /public
   /assets
 /config
+/lighthousephp
+/lighthouse
+/install.sh
+/remove.sh
+/VERSION
 
 ## 6. Layout System
 
@@ -126,15 +135,27 @@ lh_cache_invalidate('users');
 ### Session-based
 - Secure cookies
 - CSRF protection
+- Database-backed user sessions
+- Registration
+- Login/logout
+- Password reset request and reset flow
+- Account/profile update UI
+- Password change flow
 
 ### Token-based
 - Bearer tokens for APIs
+
+### Database tables
+- `users`
+- `password_reset_tokens`
 
 ## 10. Database Layer
 
 - PDO-based
 - SQL-first approach
 - Migration system using raw SQL
+- Paired `*.up.sql` / `*.down.sql` migration files
+- Migration tracking table
 
 ## 11. Frontend
 
@@ -148,6 +169,10 @@ lh_cache_invalidate('users');
 ## 12. CLI
 
 Commands:
+- version
+- update-available
+- self-update
+- uninstall
 - new
 - serve
 - migrate
@@ -155,18 +180,29 @@ Commands:
 - lighthouse-check
 - preflight
 
+CLI layers:
+- `lighthousephp` is the project-local CLI
+- `lighthouse` is the global CLI/installer-facing command
+- the global `lighthouse` command delegates project commands to the nearest Lighthouse project
+- Lighthouse is installable globally from the GitHub repository via `curl | sh`
+- GitHub release tags are the intended canonical version source for installer/update flows
+
 Behavior:
 - `serve` resolves the application in `development` mode
 - `test` resolves the application in `testing` mode
 - the CLI sets the environment context and the application bootstrap loads the matching INI file
 - the CLI does not use `config.ini.example` as runtime configuration
 - configuration is loaded once and read via `lh_config('section.key')`
+- global install metadata is persisted for update and removal workflows
 
 ## 13. Testing
 
 - Unit
 - Integration
 - HTTP tests
+- Lightweight built-in test runner
+- Assertion helpers
+- HTTP request simulation utilities
 
 ## 14. Performance Strategy
 - Zero dependencies
