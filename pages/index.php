@@ -8,6 +8,7 @@ lh_set_data([
     'description' => 'Lighthouse is a procedural PHP framework built for speed and SEO.',
 ]);
 ?>
+
 <section>
     <article>
         <h1>Welcome to Lighthouse</h1>

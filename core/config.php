@@ -21,7 +21,7 @@ $lh_config = null;
 function lh_env(): string
 {
     if (defined('LIGHTHOUSE_ENV')) {
-        return (string) LIGHTHOUSE_ENV;
+        return (string) constant('LIGHTHOUSE_ENV');
     }
 
     $env = getenv('APP_ENV');

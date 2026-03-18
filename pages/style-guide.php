@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Default style guide for Lighthouse
+ */
 lh_set_data([
     'title' => 'Style Guide',
 ]);
