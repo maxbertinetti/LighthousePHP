@@ -11,6 +11,19 @@
 $lh_db_connection = null;
 
 /**
+ * Override the active database connection.
+ *
+ * @param PDO|null $connection
+ * @return void
+ */
+function lh_db_set_connection(?PDO $connection): void
+{
+    global $lh_db_connection;
+
+    $lh_db_connection = $connection;
+}
+
+/**
  * Build a PDO DSN from the current configuration contract.
  *
  * @return string
@@ -70,11 +83,10 @@ function lh_db_connect_from_config(): void
  */
 function lh_db_connect(string $dsn, string $user = '', string $password = ''): void
 {
-    global $lh_db_connection;
-
     try {
-        $lh_db_connection = new PDO($dsn, $user, $password);
-        $lh_db_connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $connection = new PDO($dsn, $user, $password);
+        $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        lh_db_set_connection($connection);
     } catch (PDOException $e) {
         die("Database connection failed: " . $e->getMessage());
     }
@@ -94,6 +106,16 @@ function lh_db(): PDO
     }
 
     return $lh_db_connection;
+}
+
+/**
+ * Disconnect the active database connection.
+ *
+ * @return void
+ */
+function lh_db_disconnect(): void
+{
+    lh_db_set_connection(null);
 }
 
 /**

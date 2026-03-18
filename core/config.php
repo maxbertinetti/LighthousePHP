@@ -9,6 +9,23 @@
  */
 
 $lh_config = null;
+$lh_config_base_dir_override = null;
+
+/**
+ * Return the active config directory.
+ *
+ * @return string
+ */
+function lh_config_base_dir(): string
+{
+    global $lh_config_base_dir_override;
+
+    if (is_string($lh_config_base_dir_override) && $lh_config_base_dir_override !== '') {
+        return $lh_config_base_dir_override;
+    }
+
+    return dirname(__DIR__) . '/config';
+}
 
 /**
  * Resolve the active application environment.
@@ -69,7 +86,7 @@ function lh_parse_ini(string $path): array
  */
 function lh_config_path(string $env): string
 {
-    return dirname(__DIR__) . "/config/config.{$env}.ini";
+    return lh_config_base_dir() . "/config.{$env}.ini";
 }
 
 /**
@@ -135,7 +152,7 @@ function lh_load_config(): array
         return $lh_config;
     }
 
-    $baseDir = dirname(__DIR__) . '/config';
+    $baseDir = lh_config_base_dir();
     $contractPath = $baseDir . '/config.ini.example';
     $runtimePath = lh_config_path(lh_env());
 
@@ -154,6 +171,44 @@ function lh_load_config(): array
 
     $lh_config = $runtime;
     return $lh_config;
+}
+
+/**
+ * Replace the cached configuration.
+ *
+ * Primarily used by tests and CLI flows that need to swap environments.
+ *
+ * @param array|null $config
+ * @return void
+ */
+function lh_config_set(?array $config): void
+{
+    global $lh_config;
+
+    $lh_config = $config;
+}
+
+/**
+ * Clear the cached configuration so the next read reloads from disk.
+ *
+ * @return void
+ */
+function lh_config_reset(): void
+{
+    lh_config_set(null);
+}
+
+/**
+ * Override the config base directory.
+ *
+ * @param string|null $directory
+ * @return void
+ */
+function lh_config_set_base_dir(?string $directory): void
+{
+    global $lh_config_base_dir_override;
+
+    $lh_config_base_dir_override = $directory;
 }
 
 /**
