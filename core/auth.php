@@ -14,6 +14,22 @@
  */
 function lh_auth_boot(): void
 {
+    if (lh_is_testing()) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        if (!isset($_SESSION) || !is_array($_SESSION)) {
+            $_SESSION = [];
+        }
+
+        if (!isset($_SESSION['_lh']) || !is_array($_SESSION['_lh'])) {
+            $_SESSION['_lh'] = [];
+        }
+
+        return;
+    }
+
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
@@ -168,7 +184,10 @@ function lh_auth_attempt(string $username, string $password): bool
         return false;
     }
 
-    session_regenerate_id(true);
+    if (!lh_is_testing()) {
+        session_regenerate_id(true);
+    }
+
     $_SESSION['_lh']['user'] = [
         'username' => $expectedUsername,
         'login_at' => gmdate(DATE_ATOM),
@@ -185,7 +204,10 @@ function lh_auth_attempt(string $username, string $password): bool
 function lh_logout(): void
 {
     unset($_SESSION['_lh']['user']);
-    session_regenerate_id(true);
+
+    if (!lh_is_testing()) {
+        session_regenerate_id(true);
+    }
 }
 
 /**
@@ -257,7 +279,8 @@ function lh_require_csrf(): void
     }
 
     lh_set_status(419);
-    die('CSRF token mismatch.');
+    echo 'CSRF token mismatch.';
+    lh_abort_request();
 }
 
 /**

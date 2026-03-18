@@ -49,6 +49,10 @@ main > section:first-of-type:has(> article + figure) > figure img {
         grid-template-columns: repeat(2, minmax(24rem, 32rem));
         justify-content: start;
     }
+
+    .dashboard-card-primary {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (min-width: 75rem) {

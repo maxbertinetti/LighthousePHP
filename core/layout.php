@@ -13,6 +13,21 @@ $lh_layout_context = [
 ];
 
 /**
+ * Reset layout state for a fresh request.
+ *
+ * @return void
+ */
+function lh_reset_layout(): void
+{
+    global $lh_layout_context;
+
+    $lh_layout_context = [
+        'layout' => 'main',
+        'data' => [],
+    ];
+}
+
+/**
  * Set the layout to use for the current page.
  *
  * @param string $layout Layout name (without .php extension)

@@ -7,6 +7,81 @@
  * Provides headers, status, security, and utilities for HTTP responses.
  */
 
+$lh_response_state = [
+    'status' => 200,
+    'headers' => [],
+];
+
+/**
+ * Exception used to stop request processing without terminating the test process.
+ */
+class LighthouseHttpAbort extends RuntimeException
+{
+}
+
+/**
+ * Return whether the runtime is currently executing framework tests.
+ *
+ * @return bool
+ */
+function lh_is_testing(): bool
+{
+    return defined('LIGHTHOUSE_TESTING') && LIGHTHOUSE_TESTING === true;
+}
+
+/**
+ * Reset in-memory response tracking for the next request.
+ *
+ * @return void
+ */
+function lh_response_reset(): void
+{
+    global $lh_response_state;
+
+    $lh_response_state = [
+        'status' => 200,
+        'headers' => [],
+    ];
+}
+
+/**
+ * Return the tracked status code.
+ *
+ * @return int
+ */
+function lh_response_status(): int
+{
+    global $lh_response_state;
+
+    return (int) ($lh_response_state['status'] ?? 200);
+}
+
+/**
+ * Return all tracked headers.
+ *
+ * @return array<string, array{value:string, replace:bool}>
+ */
+function lh_response_headers(): array
+{
+    global $lh_response_state;
+
+    return $lh_response_state['headers'] ?? [];
+}
+
+/**
+ * Abort the current request.
+ *
+ * @return never
+ */
+function lh_abort_request()
+{
+    if (lh_is_testing()) {
+        throw new LighthouseHttpAbort('Request aborted.');
+    }
+
+    exit;
+}
+
 /**
  * Send an HTTP header.
  *
@@ -17,7 +92,16 @@
  */
 function lh_header($name, $value, $replace = true)
 {
-    header("$name: $value", $replace);
+    global $lh_response_state;
+
+    $lh_response_state['headers'][$name] = [
+        'value' => (string) $value,
+        'replace' => (bool) $replace,
+    ];
+
+    if (!lh_is_testing()) {
+        header("$name: $value", $replace);
+    }
 }
 
 /**
@@ -28,6 +112,9 @@ function lh_header($name, $value, $replace = true)
  */
 function lh_set_status($code)
 {
+    global $lh_response_state;
+
+    $lh_response_state['status'] = (int) $code;
     http_response_code($code);
 }
 
@@ -62,7 +149,7 @@ function lh_send_etag($etag)
         foreach ($clientEtags as $clientEtag) {
             if (trim($clientEtag) === $etag) {
                 lh_set_status(304);
-                exit;
+                lh_abort_request();
             }
         }
     }
@@ -130,7 +217,7 @@ function lh_redirect($url, $status = 302)
 {
     lh_set_status($status);
     lh_header('Location', $url);
-    exit;
+    lh_abort_request();
 }
 
 /**
