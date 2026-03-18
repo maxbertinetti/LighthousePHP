@@ -419,12 +419,15 @@ function lh_migration_rollback(PDO $pdo, string $directory, int $step = 0): arra
  * Connect to the configured database for migrations.
  *
  * @param string $environment
+ * @param string|null $root
  * @return PDO
  */
-function lh_migration_connect(string $environment = 'development'): PDO
+function lh_migration_connect(string $environment = 'development', ?string $root = null): PDO
 {
     putenv("APP_ENV={$environment}");
-    lh_config_set_base_dir(dirname(lh_migration_dir()) . '/config');
+    lh_env_set_override($environment);
+    $projectRoot = $root ?? dirname(__DIR__);
+    lh_config_set_base_dir(rtrim($projectRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'config');
     lh_config_reset();
     lh_db_disconnect();
     lh_load_config();

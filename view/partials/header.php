@@ -17,6 +17,7 @@
             <li><a href="/style-guide">Style Guide</a></li>
             <?php if (function_exists('lh_is_authenticated') && lh_is_authenticated()): ?>
                 <li><a href="/dashboard/home">Dashboard</a></li>
+                <li><a href="/dashboard/account">Account</a></li>
                 <li class="nav-action">
                     <form class="nav-inline-form" action="/auth/logout" method="post">
                         <?php echo lh_csrf_input(); ?>
@@ -25,6 +26,7 @@
                 </li>
             <?php else: ?>
                 <li><a href="/auth/login">Log In</a></li>
+                <li><a href="/auth/register">Register</a></li>
             <?php endif; ?>
         </ul>
     </nav>

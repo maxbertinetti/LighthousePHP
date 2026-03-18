@@ -254,7 +254,6 @@ function lh_cli_command_new(array $options, array $args): int
         'public',
         'tests',
         'view',
-        'test',
         'lighthousephp',
     ];
 
@@ -287,7 +286,6 @@ function lh_cli_command_new(array $options, array $args): int
         touch($testDb);
     }
 
-    chmod($targetPath . '/test', 0755);
     chmod($targetPath . '/lighthousephp', 0755);
 
     lh_cli_out("Created Lighthouse project at {$targetPath}");
@@ -357,14 +355,21 @@ function lh_cli_command_serve(array $options): int
  */
 function lh_cli_command_test(array $options): int
 {
-    $command = [lh_cli_php_binary(), lh_cli_root() . '/test'];
+    $bootstrap = lh_cli_root() . '/tests/bootstrap.php';
+
+    if (!file_exists($bootstrap)) {
+        lh_cli_err('Missing tests/bootstrap.php.');
+        return 1;
+    }
 
     if (!empty($options['dry-run'])) {
-        lh_cli_out(implode(' ', array_map('escapeshellarg', $command)));
+        lh_cli_out('Internal test runner: ' . $bootstrap);
         return 0;
     }
 
-    return lh_cli_passthru($command, ['APP_ENV' => 'testing']);
+    require_once $bootstrap;
+
+    return lh_run_tests(lh_collect_tests(lh_cli_root()));
 }
 
 /**
@@ -385,7 +390,7 @@ function lh_cli_command_migrate(array $options, array $args): int
     $step = max(0, (int) ($options['step'] ?? 0));
 
     try {
-        $pdo = lh_migration_connect($environment);
+        $pdo = lh_migration_connect($environment, lh_cli_root());
         $directory = lh_migration_dir(lh_cli_root());
 
         switch ($action) {
@@ -446,6 +451,7 @@ function lh_cli_command_migrate(array $options, array $args): int
         lh_db_disconnect();
         lh_config_reset();
         lh_config_set_base_dir(null);
+        lh_env_set_override(null);
     }
 }
 

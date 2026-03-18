@@ -144,9 +144,8 @@ from_address = "noreply@example.test"
 from_name = "LighthousePHP"
 
 [auth]
-demo_username = "admin"
-demo_password_hash = "hash"
 api_token = "token"
+password_reset_expiry_minutes = 60
 INI
             );
             copy($configDir . '/config.ini.example', $configDir . '/config.development.ini');

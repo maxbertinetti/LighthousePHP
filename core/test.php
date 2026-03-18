@@ -14,6 +14,28 @@ class LighthouseAssertionFailed extends RuntimeException
 }
 
 /**
+ * Load all test case files from the project test directory.
+ *
+ * @param string|null $root
+ * @return array<int, array{name:string, callback:callable}>
+ */
+function lh_collect_tests(?string $root = null): array
+{
+    $base = $root ?? dirname(__DIR__);
+    $tests = [];
+
+    foreach (glob($base . '/tests/*Test.php') ?: [] as $testFile) {
+        $loaded = require $testFile;
+
+        if (is_array($loaded)) {
+            $tests = array_merge($tests, $loaded);
+        }
+    }
+
+    return $tests;
+}
+
+/**
  * Register a test case.
  *
  * @param string $name

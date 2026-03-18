@@ -34,7 +34,7 @@ function lh_db_dsn(): string
 
     if ($driver === 'sqlite') {
         $path = (string) lh_config('database.sqlite_path');
-        $root = dirname(__DIR__);
+        $root = lh_project_root();
 
         return 'sqlite:' . $root . '/' . ltrim($path, '/');
     }

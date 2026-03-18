@@ -18,7 +18,7 @@ lh_set_data([
 <section>
     <article>
         <h1>Log Out</h1>
-        <p>You are signed in as <strong><?php echo lh_e((string) (lh_auth_user()['username'] ?? '')); ?></strong>.</p>
+        <p>You are signed in as <strong><?php echo lh_e((string) (lh_auth_user()['email'] ?? '')); ?></strong>.</p>
         <p>Submit the form below to end the current session.</p>
         <form action="/auth/logout" method="post">
             <?php echo lh_csrf_input(); ?>

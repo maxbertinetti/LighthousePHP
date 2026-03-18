@@ -10,6 +10,7 @@
 
 $lh_config = null;
 $lh_config_base_dir_override = null;
+$lh_env_override = null;
 
 /**
  * Return the active config directory.
@@ -28,6 +29,16 @@ function lh_config_base_dir(): string
 }
 
 /**
+ * Return the active project root for config-relative paths.
+ *
+ * @return string
+ */
+function lh_project_root(): string
+{
+    return dirname(lh_config_base_dir());
+}
+
+/**
  * Resolve the active application environment.
  *
  * Preferred source is a constant defined by the CLI. Until the CLI is in
@@ -37,6 +48,12 @@ function lh_config_base_dir(): string
  */
 function lh_env(): string
 {
+    global $lh_env_override;
+
+    if (is_string($lh_env_override) && $lh_env_override !== '') {
+        return $lh_env_override;
+    }
+
     if (defined('LIGHTHOUSE_ENV')) {
         return (string) constant('LIGHTHOUSE_ENV');
     }
@@ -209,6 +226,19 @@ function lh_config_set_base_dir(?string $directory): void
     global $lh_config_base_dir_override;
 
     $lh_config_base_dir_override = $directory;
+}
+
+/**
+ * Override the active environment resolution.
+ *
+ * @param string|null $environment
+ * @return void
+ */
+function lh_env_set_override(?string $environment): void
+{
+    global $lh_env_override;
+
+    $lh_env_override = $environment;
 }
 
 /**

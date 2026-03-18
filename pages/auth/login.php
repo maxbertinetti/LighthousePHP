@@ -10,22 +10,22 @@ if (lh_is_authenticated()) {
 }
 
 $error = '';
-$username = '';
+$identifier = '';
 
 if (lh_request_method() === 'POST') {
     lh_require_csrf();
 
-    $username = lh_post('username');
+    $identifier = lh_post('identifier');
     $password = lh_post('password');
 
-    if ($username === '' || $password === '') {
-        $error = 'Username and password are required.';
+    if ($identifier === '' || $password === '') {
+        $error = 'Email/username and password are required.';
         lh_set_status(422);
-    } elseif (lh_auth_attempt($username, $password)) {
+    } elseif (lh_auth_attempt($identifier, $password)) {
         lh_flash_set('success', 'You are now signed in.');
         lh_redirect($redirect, 302);
     } else {
-        $error = 'Invalid username or password.';
+        $error = 'Invalid login credentials.';
         lh_set_status(401);
     }
 }
@@ -39,7 +39,7 @@ lh_set_data([
 <section class="auth-grid">
     <article class="auth-card auth-card-form">
         <h1>Log In</h1>
-        <p>Use the demo account configured in `config/config.development.ini` to access the dashboard.</p>
+        <p>Sign in with the email address or username you registered with.</p>
         <?php if ($error !== ''): ?>
             <p><strong>Error:</strong> <?php echo lh_e($error); ?></p>
         <?php endif; ?>
@@ -48,12 +48,12 @@ lh_set_data([
             <input type="hidden" name="redirect" value="<?php echo lh_e($redirect); ?>">
 
             <p>
-                <label for="username">Username</label>
+                <label for="identifier">Email or Username</label>
                 <input
-                    id="username"
-                    name="username"
+                    id="identifier"
+                    name="identifier"
                     type="text"
-                    value="<?php echo lh_e($username); ?>"
+                    value="<?php echo lh_e($identifier); ?>"
                     autocomplete="username"
                     required
                 >
@@ -74,12 +74,13 @@ lh_set_data([
                 <button type="submit">Log In</button>
             </p>
         </form>
+        <p><a href="/auth/forgot-password">Forgot your password?</a></p>
     </article>
 
     <article class="auth-card auth-card-aside">
-        <h2>Development Defaults</h2>
-        <p>Username: <code>admin</code></p>
-        <p>Password: <code>lighthouse-demo-password</code></p>
-        <p>Bearer token: <code>lighthouse-demo-token</code></p>
+        <h2>New Here?</h2>
+        <p>Create a real account, manage your profile from the dashboard, and use email-based password reset when needed.</p>
+        <p><a href="/auth/register">Create an account</a></p>
+        <p>Bearer token auth remains available for API routes.</p>
     </article>
 </section>
