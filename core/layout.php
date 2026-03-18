@@ -50,7 +50,7 @@ function lh_layout(string $content): string
     $layoutPath = __DIR__ . '/../view/layouts/' . $layout . '.php';
 
     if (!file_exists($layoutPath)) {
-        lh_e("Layout not found: {$layout}");
+        trigger_error("Layout not found: {$layout}", E_USER_WARNING);
         return $content;
     }
 
@@ -73,7 +73,8 @@ function lh_partial(string $name, array $data = []): string
     $partialPath = __DIR__ . '/../view/partials/' . $name . '.php';
 
     if (!file_exists($partialPath)) {
-        return lh_e("Partial not found: {$name}");
+        trigger_error("Partial not found: {$name}", E_USER_WARNING);
+        return '<!-- Partial not found: ' . lh_e($name) . ' -->';
     }
 
     ob_start();

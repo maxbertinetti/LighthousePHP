@@ -8,16 +8,13 @@
  */
 ?>
 <header>
-    <h1><?php echo lh_e($data['site_name'] ?? 'Lighthouse') ?></h1>
-    <div class="header-actions">
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/style-guide">Style Guide</a></li>
-            </ul>
-        </nav>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" type="button">🌓</button>
-        <button id="rtl-toggle" class="rtl-toggle" aria-label="Toggle RTL" type="button">⇄</button>
-        <button id="menu-toggle" aria-label="Toggle menu">☰</button>
-    </div>
+    <nav aria-label="Primary">
+        <p><a href="/">LighthousePHP</a></p>
+        <button type="button" id="menu-toggle" aria-expanded="false" aria-controls="primary-menu" aria-label="Toggle navigation">
+            &#9776;
+        </button>
+        <ul id="primary-menu">
+            <li><a href="/style-guide">Style Guide</a></li>
+        </ul>
+    </nav>
 </header>

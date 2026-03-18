@@ -8,5 +8,5 @@
  */
 ?>
 <footer>
-    <p>&copy; <?php echo date('Y') ?> Lighthouse. All rights reserved.</p>
+    <p>&copy; <?php echo date('Y') ?> LighthousePHP.</p>
 </footer>

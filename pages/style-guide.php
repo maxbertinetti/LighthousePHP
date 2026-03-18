@@ -1,123 +1,193 @@
 <?php
-// /pages/style-guide.php
-// Style Guide page for Lighthouse
-// Example content: layout, components, forms, buttons, utilities, advanced
 lh_set_data([
     'title' => 'Style Guide',
 ]);
 ?>
-<section class="container section">
+<section>
     <h1>Style Guide</h1>
-    <p>This page showcases all components and utilities from default.css, inspired by PicoCSS.</p>
+    <p>
+        This page demonstrates how raw semantic HTML looks with the default stylesheet.
+        There are no utility classes or component classes in this document.
+    </p>
+</section>
 
+<section>
     <h2>Layout</h2>
-    <div class="grid">
-        <div class="card">
-            <div class="card-header">Card One</div>
-            <div>First card content. The grid arranges cards automatically.</div>
-            <div class="card-footer">Footer</div>
-        </div>
-        <div class="card">
-            <div class="card-header">Card Two</div>
-            <div>Second card content. On desktop these sit side by side.</div>
-            <div class="card-footer">Footer</div>
-        </div>
-        <div class="card">
-            <div class="card-header">Card Three</div>
-            <div>Third card content. On mobile they stack vertically.</div>
-            <div class="card-footer">Footer</div>
-        </div>
-    </div>
+    <article>
+        <h3>Article One</h3>
+        <p>Semantic sections and articles create hierarchy without needing presentational wrappers.</p>
+        <p><small>Updated daily with lightweight defaults.</small></p>
+    </article>
+    <article>
+        <h3>Article Two</h3>
+        <p>Content blocks stack naturally on small screens and breathe more on larger ones.</p>
+        <p><small>Readable, responsive, and intentionally restrained.</small></p>
+    </article>
+    <article>
+        <h3>Article Three</h3>
+        <p>Each block exists to test spacing, rhythm, and contrast using only semantic HTML.</p>
+        <p><small>No custom hooks required.</small></p>
+    </article>
+</section>
 
-    <div class="alert info">Alert info</div>
-    <div class="alert success">Alert success</div>
-    <div class="alert warning">Alert warning</div>
-    <div class="alert danger">Alert danger</div>
-
-    <h2>Badge & Progress</h2>
-    <span class="badge">Badge</span>
+<section>
+    <h2>Progress</h2>
+    <p>The native <code>progress</code> element should inherit the same calm defaults as the rest of the page.</p>
     <progress value="60" max="100"></progress>
+</section>
 
+<section>
     <h2>Table</h2>
     <table>
+        <caption>Feature overview</caption>
         <thead>
             <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
+                <th scope="col">Feature</th>
+                <th scope="col">Purpose</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Value 1</td>
-                <td>Value 2</td>
+                <th scope="row">Semantic defaults</th>
+                <td>Give plain HTML a polished appearance.</td>
+            </tr>
+            <tr>
+                <th scope="row">Responsive media</th>
+                <td>Keep images, video, and tables flexible.</td>
+            </tr>
+            <tr>
+                <th scope="row">Native controls</th>
+                <td>Prefer built-in HTML elements over custom components.</td>
             </tr>
         </tbody>
     </table>
+</section>
 
+<section>
     <h2>Form</h2>
     <form>
-        <div class="form-group">
-            <label for="input1">Input</label>
-            <input id="input1" type="text" placeholder="Text...">
-        </div>
-        <div class="form-group">
-            <label for="select1">Select</label>
-            <select id="select1">
-                <option>Option 1</option>
-                <option>Option 2</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label><input type="checkbox"> Checkbox</label>
-            <label><input type="radio" name="r"> Radio</label>
-        </div>
-        <div class="form-actions">
-            <button type="submit">Submit</button>
-            <button type="button" class="secondary">Secondary</button>
-        </div>
+        <fieldset>
+            <legend>Contact Example</legend>
+
+            <p>
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" placeholder="Jane Doe" autocomplete="name" required minlength="2">
+            </p>
+
+            <p>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="jane@example.com" autocomplete="email" required>
+            </p>
+
+            <p>
+                <label for="topic">Topic</label>
+                <select id="topic" name="topic" required>
+                    <option value="">Choose a topic</option>
+                    <option>General question</option>
+                    <option>Documentation</option>
+                    <option>Performance</option>
+                </select>
+            </p>
+
+            <p>
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Write a short message" required minlength="20"></textarea>
+            </p>
+
+            <p>
+                <label><input type="checkbox" name="updates"> Send occasional product updates</label>
+            </p>
+
+            <p>
+                <button type="submit">Send message</button>
+            </p>
+        </fieldset>
     </form>
+</section>
 
-    <h2>Buttons & Group</h2>
-    <div role="group">
-        <button>Left</button>
-        <button>Middle</button>
-        <button>Right</button>
-    </div>
+<section>
+    <h2>Buttons</h2>
+    <nav aria-label="Example actions">
+        <ul>
+            <li><button type="button">Preview</button></li>
+            <li><button type="button">Publish</button></li>
+            <li><button type="button">Archive</button></li>
+        </ul>
+    </nav>
+</section>
 
-    <h2>Dropdown</h2>
-    <div class="dropdown">
-        <button class="dropdown-toggle">Dropdown</button>
-        <div class="dropdown-menu">
-            <a href="#">Action 1</a>
-            <a href="#">Action 2</a>
-        </div>
-    </div>
+<section>
+    <h2>Disclosure</h2>
+    <details name="style-guide-disclosure" open>
+        <summary>What does classless mean here?</summary>
+        <p>
+            It means the stylesheet styles native HTML elements directly, so new pages begin with
+            semantic markup instead of utility naming.
+        </p>
+    </details>
+    <details name="style-guide-disclosure">
+        <summary>When should markup change?</summary>
+        <p>Whenever the HTML structure is fighting the semantics or readability of the document.</p>
+    </details>
+</section>
 
-    <h2>Accordion</h2>
-    <div class="accordion">
-        <div class="accordion-item open">
-            <div class="accordion-header" tabindex="0">Section 1</div>
-            <div class="accordion-content">Content 1</div>
-        </div>
-        <div class="accordion-item">
-            <div class="accordion-header" tabindex="0">Section 2</div>
-            <div class="accordion-content">Content 2</div>
-        </div>
-    </div>
-
+<section>
     <h2>Code & Blockquote</h2>
     <pre><code>&lt;div&gt;Example code&lt;/div&gt;</code></pre>
-    <blockquote>Example quotation</blockquote>
+    <blockquote>
+        Semantic HTML should be the source of both structure and meaning; CSS should refine it,
+        not rescue it.
+        <cite>Lighthouse design direction</cite>
+    </blockquote>
+</section>
 
-    <h2>Utility</h2>
-    <div class="text-center">text-center</div>
-    <div class="text-right">text-right</div>
-    <div class="mt">mt (margin-top)</div>
-    <div class="mb">mb (margin-bottom)</div>
-    <div class="p">p (padding)</div>
+<section>
+    <h2>default.js</h2>
+    <p>
+        The JavaScript layer is attribute-driven, so HTML remains the interface for requests,
+        transitions, server-sent events, and WebSockets.
+    </p>
+    <pre><code>&lt;button
+    data-get="/partial/example"
+    data-target="main"
+    data-swap="innerHTML"
+    data-transition="fade"&gt;
+    Load content
+&lt;/button&gt;</code></pre>
+    <pre><code>&lt;form
+    data-ajax
+    action="/contact"
+    method="post"
+    data-target="main"
+    data-transition="slide"&gt;
+    ...
+&lt;/form&gt;</code></pre>
+    <pre><code>&lt;section
+    data-sse="/events"
+    data-sse-event="message"
+    data-target="this"
+    data-swap="append"&gt;
+&lt;/section&gt;</code></pre>
+    <pre><code>&lt;section data-ws="wss://example.com/socket" data-target="this"&gt;
+    &lt;form data-ws-send="closest" data-ws-format="json"&gt;
+        ...
+    &lt;/form&gt;
+&lt;/section&gt;</code></pre>
+</section>
 
-    <h2>Conditional Styling</h2>
-    <div class="nodefault">
-        <button>This button has NO default.css styling</button>
-    </div>
+<section>
+    <h2>Lists & Definitions</h2>
+    <ul>
+        <li>Use meaningful elements first.</li>
+        <li>Prefer native browser behavior where possible.</li>
+        <li>Keep the styling surface small and predictable.</li>
+    </ul>
+</section>
+<section>
+    <dl>
+        <dt>Semantic markup</dt>
+        <dd>HTML chosen for meaning and document structure.</dd>
+        <dt>Classless CSS</dt>
+        <dd>Element-driven styling with minimal custom hooks.</dd>
+    </dl>
 </section>
