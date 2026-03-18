@@ -2,3 +2,69 @@ main > section:first-of-type:has(> article + figure) > figure img {
     border-radius: 0;
     box-shadow: none;
 }
+
+.nav-action {
+    display: flex;
+    align-items: center;
+}
+
+.nav-inline-form {
+    margin: 0;
+    max-width: none;
+    display: flex;
+    align-items: center;
+}
+
+.nav-inline-button {
+    width: auto;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.auth-grid,
+.dashboard-grid {
+    align-items: start;
+}
+
+.auth-card,
+.dashboard-card {
+    min-height: 100%;
+}
+
+.auth-card-form form {
+    max-width: 100%;
+}
+
+.dashboard-card-primary h1 {
+    max-width: 8ch;
+}
+
+@media (min-width: 40.001rem) {
+    .auth-grid {
+        grid-template-columns: minmax(24rem, 30rem) minmax(22rem, 30rem);
+        justify-content: start;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(24rem, 32rem));
+        justify-content: start;
+    }
+}
+
+@media (min-width: 75rem) {
+    .auth-grid {
+        grid-template-columns: minmax(28rem, 34rem) minmax(24rem, 34rem);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(28rem, 34rem));
+        justify-content: start;
+    }
+}
+
+@media (max-width: 40rem) {
+    .nav-inline-form,
+    .nav-inline-button {
+        width: 100%;
+    }
+}

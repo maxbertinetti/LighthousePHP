@@ -55,6 +55,7 @@ function lh_layout(string $content): string
     }
 
     ob_start();
+    $data = is_array($data) ? $data : [];
     extract($data);
     $page_content = $content;
     require $layoutPath;
@@ -78,6 +79,7 @@ function lh_partial(string $name, array $data = []): string
     }
 
     ob_start();
+    $data = is_array($data) ? $data : [];
     extract($data);
     require $partialPath;
     return ob_get_clean();

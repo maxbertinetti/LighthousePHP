@@ -20,6 +20,14 @@ lh_set_data([
             Build fast pages with semantic HTML, predictable rendering, and an intentionally
             lightweight foundation.
         </p>
+        <p>
+            Phase 6 has started with session authentication, CSRF-protected forms, and a
+            dashboard flow you can build on.
+        </p>
+        <p>
+            <a href="/auth/login">Open the login page</a> or go straight to the
+            <a href="/dashboard/home">dashboard</a>.
+        </p>
     </article>
     <figure>
         <img src="/assets/img/Logo.png" alt="Lighthouse logo">

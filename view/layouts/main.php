@@ -24,6 +24,13 @@
 <body>
     <?php echo lh_partial('header', $data) ?>
     <main>
+        <?php $flash = function_exists('lh_flash_get') ? lh_flash_get() : null; ?>
+        <?php if (is_array($flash) && isset($flash['message'])): ?>
+            <aside aria-live="polite">
+                <strong><?php echo lh_e(ucfirst((string) ($flash['type'] ?? 'info'))) ?>:</strong>
+                <?php echo lh_e((string) $flash['message']) ?>
+            </aside>
+        <?php endif; ?>
         <?php echo $page_content ?>
     </main>
     <?php echo lh_partial('footer', $data) ?>

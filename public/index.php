@@ -5,9 +5,11 @@ require_once __DIR__ . '/../core/http.php';
 require_once __DIR__ . '/../core/config.php';
 require_once __DIR__ . '/../core/layout.php';
 require_once __DIR__ . '/../core/db.php';
+require_once __DIR__ . '/../core/auth.php';
 
 lh_load_config();
 lh_apply_environment_defaults();
+lh_auth_boot();
 lh_db_connect_from_config();
 
 // --- URL ---
