@@ -75,13 +75,13 @@
 ### Phase 10 - CLI and Github Project
 - Use GitHub release tags as the canonical Lighthouse version number
 - Remove manual `VERSION` drift by deriving installed version from the release/version source of truth
-- Install Lighthouse globally from the GitHub repo via `curl | sh`
+- [x] Install Lighthouse globally from the GitHub repo via `curl | sh`
 - Support branch/tag/version selection during install
-- Add `lighthouse version`
-- Add `lighthouse update-available`
-- Add `lighthouse self-update`
-- Add `lighthouse uninstall`
-- Persist install metadata for update and removal workflows
+- [x] Add `lighthouse version`
+- [x] Add `lighthouse update-available`
+- [x] Add `lighthouse self-update`
+- [x] Add `lighthouse uninstall`
+- [x] Persist install metadata for update and removal workflows
 - Download packaged framework bundles from GitHub releases instead of relying on a local checkout
 - Add release packaging for installer-compatible bundles
 - Add GitHub release publication workflow
