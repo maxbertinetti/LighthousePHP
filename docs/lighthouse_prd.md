@@ -86,7 +86,6 @@ Each file handles HTTP methods internally.
 /lighthouse
 /install.sh
 /remove.sh
-/VERSION
 
 ## 6. Layout System
 
@@ -186,6 +185,7 @@ CLI layers:
 - the global `lighthouse` command delegates project commands to the nearest Lighthouse project
 - Lighthouse is installable globally from the GitHub repository via `curl | sh`
 - GitHub release tags are the intended canonical version source for installer/update flows
+- installed versions are derived from release tags or install metadata, not from a committed `VERSION` file
 
 Behavior:
 - `serve` resolves the application in `development` mode

@@ -11,11 +11,11 @@ read_metadata() {
 }
 
 effective_ref_type() {
-    printf '%s\n' "${LIGHTHOUSE_REF_TYPE:-branch}"
+    printf '%s\n' "${LIGHTHOUSE_REF_TYPE:-latest}"
 }
 
 effective_ref() {
-    printf '%s\n' "${LIGHTHOUSE_REF:-main}"
+    printf '%s\n' "${LIGHTHOUSE_REF:-}"
 }
 
 effective_ref_selector() {
@@ -23,6 +23,9 @@ effective_ref_selector() {
     ref=$(effective_ref)
 
     case "$ref_type" in
+        latest)
+            printf '%s\n' ""
+            ;;
         tag)
             printf '%s\n' "tag:$ref"
             ;;
@@ -86,17 +89,18 @@ remote_version() {
         return 1
     fi
 
-    ref=$(effective_ref)
-    curl -fsSL "https://raw.githubusercontent.com/$LIGHTHOUSE_REPO/$ref/VERSION"
+    curl -fsSL "https://api.github.com/repos/$LIGHTHOUSE_REPO/releases/latest" \
+        | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' \
+        | head -n 1
 }
 
 show_version() {
-    local_version=$(cat "$LIGHTHOUSE_HOME/VERSION")
+    local_version=${LIGHTHOUSE_INSTALLED_VERSION:-unknown}
     printf '%s\n' "Lighthouse $local_version"
 }
 
 show_update_available() {
-    local_version=$(cat "$LIGHTHOUSE_HOME/VERSION")
+    local_version=${LIGHTHOUSE_INSTALLED_VERSION:-unknown}
     latest_version=$(remote_version 2>/dev/null || true)
 
     if [ -z "$latest_version" ]; then
@@ -117,12 +121,13 @@ self_update() {
     install_url=${LIGHTHOUSE_INSTALL_URL:-}
 
     if [ -n "$install_url" ]; then
+        install_selector=$(effective_ref_selector)
         LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
         LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
         LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
         LIGHTHOUSE_INSTALL_URL="$install_url" \
         LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
-        LIGHTHOUSE_REF="$(effective_ref_selector)" \
+        LIGHTHOUSE_REF="$install_selector" \
         sh -c 'curl -fsSL "$LIGHTHOUSE_INSTALL_URL" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
         return 0
     fi
@@ -130,12 +135,18 @@ self_update() {
     if [ -n "${LIGHTHOUSE_REPO:-}" ]; then
         install_ref=$(effective_ref)
         install_selector=$(effective_ref_selector)
+        installer_ref=main
+
+        if [ "$install_selector" != "" ] && [ "$install_ref" != "" ]; then
+            installer_ref=$install_ref
+        fi
+
         LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
         LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
         LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
         LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
         LIGHTHOUSE_REF="$install_selector" \
-        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/'"$install_ref"'/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
+        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/'"$installer_ref"'/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
         return 0
     fi
 

@@ -7,12 +7,13 @@ SHARE_DIR=${LIGHTHOUSE_SHARE_DIR:-"$PREFIX/share/lighthouse"}
 FRAMEWORK_DIR="$SHARE_DIR/current"
 SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 REPO_SLUG=${LIGHTHOUSE_REPO:-${1:-}}
-REPO_SELECTOR=${LIGHTHOUSE_REF:-${2:-main}}
+REPO_SELECTOR=${LIGHTHOUSE_REF:-${2:-}}
 INSTALL_URL=${LIGHTHOUSE_INSTALL_URL:-}
 TEMP_DIR=
 REPO_REF=
 REPO_REF_TYPE=
 BUNDLE_ASSET_NAME=
+RESOLVED_VERSION=
 
 cleanup() {
     if [ -n "${TEMP_DIR:-}" ] && [ -d "$TEMP_DIR" ]; then
@@ -24,6 +25,12 @@ trap cleanup EXIT INT TERM
 
 resolve_ref() {
     selector=$1
+
+    if [ -z "$selector" ]; then
+        REPO_REF_TYPE=latest
+        REPO_REF=$(latest_release_tag)
+        return 0
+    fi
 
     case "$selector" in
         branch:*)
@@ -38,6 +45,10 @@ resolve_ref() {
             REPO_REF_TYPE=tag
             REPO_REF=${selector#version:}
             ;;
+        latest)
+            REPO_REF_TYPE=latest
+            REPO_REF=$(latest_release_tag)
+            ;;
         *)
             REPO_REF_TYPE=branch
             REPO_REF=$selector
@@ -50,8 +61,54 @@ resolve_ref() {
     fi
 }
 
+latest_release_tag() {
+    if [ "${LIGHTHOUSE_LATEST_RELEASE:-}" != "" ]; then
+        printf '%s\n' "$LIGHTHOUSE_LATEST_RELEASE"
+        return 0
+    fi
+
+    if [ -z "$REPO_SLUG" ]; then
+        printf '%s\n' "Set LIGHTHOUSE_REPO=owner/repo or pass 'owner/repo' to install.sh when installing from GitHub." >&2
+        exit 1
+    fi
+
+    tag=$(curl -fsSL "https://api.github.com/repos/$REPO_SLUG/releases/latest" \
+        | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' \
+        | head -n 1)
+
+    if [ -z "$tag" ]; then
+        printf '%s\n' "Unable to determine the latest Lighthouse release." >&2
+        exit 1
+    fi
+
+    printf '%s\n' "$tag"
+}
+
 bundle_asset_name() {
     printf '%s\n' "lighthousephp-$REPO_REF.tar.gz"
+}
+
+resolve_version() {
+    if [ "${LIGHTHOUSE_RELEASE_VERSION:-}" != "" ]; then
+        printf '%s\n' "$LIGHTHOUSE_RELEASE_VERSION"
+        return 0
+    fi
+
+    if [ "$REPO_REF_TYPE" = "tag" ]; then
+        printf '%s\n' "$REPO_REF"
+        return 0
+    fi
+
+    if command -v git >/dev/null 2>&1 && [ -d "$SCRIPT_DIR/.git" ]; then
+        version=$(git -C "$SCRIPT_DIR" describe --tags --always --dirty 2>/dev/null || true)
+
+        if [ -n "$version" ]; then
+            printf '%s\n' "$version"
+            return 0
+        fi
+    fi
+
+    printf '%s\n' "$REPO_REF"
 }
 
 default_download_url() {
@@ -60,7 +117,7 @@ default_download_url() {
         exit 1
     fi
 
-    if [ "$REPO_REF_TYPE" = "tag" ]; then
+    if [ "$REPO_REF_TYPE" = "tag" ] || [ "$REPO_REF_TYPE" = "latest" ]; then
         printf '%s\n' "https://github.com/$REPO_SLUG/releases/download/$REPO_REF/$BUNDLE_ASSET_NAME"
         return 0
     fi
@@ -74,7 +131,7 @@ copy_framework_tree() {
 
     mkdir -p "$target_dir"
 
-    for path in .gitignore VERSION config core docs migrations pages public tests view lighthouse lighthousephp remove.sh install.sh; do
+    for path in .gitignore LICENSE README.md config core docs migrations pages public tests view lighthouse lighthousephp remove.sh install.sh; do
         cp -R "$source_dir/$path" "$target_dir/$path"
     done
 }
@@ -95,10 +152,8 @@ download_framework_tree() {
 }
 
 write_metadata() {
-    version=$(cat "$FRAMEWORK_DIR/VERSION")
-
     cat > "$SHARE_DIR/metadata.env" <<EOF
-LIGHTHOUSE_INSTALLED_VERSION=$version
+LIGHTHOUSE_INSTALLED_VERSION=$RESOLVED_VERSION
 LIGHTHOUSE_REPO=$REPO_SLUG
 LIGHTHOUSE_REF=$REPO_REF
 LIGHTHOUSE_REF_TYPE=$REPO_REF_TYPE
@@ -127,6 +182,7 @@ mkdir -p "$SHARE_DIR"
 rm -rf "$FRAMEWORK_DIR"
 resolve_ref "$REPO_SELECTOR"
 BUNDLE_ASSET_NAME=$(bundle_asset_name)
+RESOLVED_VERSION=$(resolve_version)
 
 if [ -f "$SCRIPT_DIR/core/cli.php" ] && [ -f "$SCRIPT_DIR/lighthousephp" ] && [ -f "$SCRIPT_DIR/lighthouse" ]; then
     copy_framework_tree "$SCRIPT_DIR" "$FRAMEWORK_DIR"
@@ -142,7 +198,7 @@ install_wrapper
 printf '%s\n' "Lighthouse installed."
 printf '%s\n' "  Binary: $BIN_DIR/lighthouse"
 printf '%s\n' "  Framework bundle: $FRAMEWORK_DIR"
-printf '%s\n' "  Version: $(cat "$FRAMEWORK_DIR/VERSION")"
+printf '%s\n' "  Version: $RESOLVED_VERSION"
 printf '%s\n' ""
 printf '%s\n' "Add this to your shell profile if needed:"
 printf '%s\n' "  export PATH=\"$BIN_DIR:\$PATH\""

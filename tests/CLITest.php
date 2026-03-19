@@ -74,7 +74,10 @@ return [
         try {
             $result = lh_run_command(
                 ['sh', 'install.sh', 'maxbertinetti/LighthousePHP', 'tag:0.1.0'],
-                ['LIGHTHOUSE_PREFIX' => $prefix],
+                [
+                    'LIGHTHOUSE_PREFIX' => $prefix,
+                    'LIGHTHOUSE_RELEASE_VERSION' => '0.1.0',
+                ],
                 $repoRoot
             );
 
@@ -95,6 +98,43 @@ return [
         }
     }),
 
+    lh_test('install script defaults to latest release when no selector is provided', function (): void {
+        $tempRoot = sys_get_temp_dir() . '/lighthouse-latest-' . bin2hex(random_bytes(4));
+        $prefix = $tempRoot . '/prefix';
+        $repoRoot = dirname(__DIR__);
+
+        if (!mkdir($tempRoot, 0777, true) && !is_dir($tempRoot)) {
+            throw new RuntimeException('Unable to create temp root.');
+        }
+
+        try {
+            $result = lh_run_command(
+                ['sh', 'install.sh', 'maxbertinetti/LighthousePHP'],
+                [
+                    'LIGHTHOUSE_PREFIX' => $prefix,
+                    'LIGHTHOUSE_LATEST_RELEASE' => '0.1.0',
+                    'LIGHTHOUSE_RELEASE_VERSION' => '0.1.0',
+                ],
+                $repoRoot
+            );
+
+            lh_assert_same(0, $result['code'], $result['stderr']);
+            lh_assert_contains('Lighthouse installed.', $result['stdout']);
+
+            $metadata = file_get_contents($prefix . '/share/lighthouse/metadata.env');
+
+            if ($metadata === false) {
+                throw new RuntimeException('Expected metadata.env to be created.');
+            }
+
+            lh_assert_contains('LIGHTHOUSE_REF=0.1.0', $metadata);
+            lh_assert_contains('LIGHTHOUSE_REF_TYPE=latest', $metadata);
+            lh_assert_contains('LIGHTHOUSE_INSTALLED_VERSION=0.1.0', $metadata);
+        } finally {
+            lh_delete_tree($tempRoot);
+        }
+    }),
+
     lh_test('installed lighthouse version works for tag-based install metadata', function (): void {
         $tempRoot = sys_get_temp_dir() . '/lighthouse-global-' . bin2hex(random_bytes(4));
         $prefix = $tempRoot . '/prefix';
@@ -107,7 +147,10 @@ return [
         try {
             $install = lh_run_command(
                 ['sh', 'install.sh', 'maxbertinetti/LighthousePHP', 'version:0.1.0'],
-                ['LIGHTHOUSE_PREFIX' => $prefix],
+                [
+                    'LIGHTHOUSE_PREFIX' => $prefix,
+                    'LIGHTHOUSE_RELEASE_VERSION' => '0.1.0',
+                ],
                 $repoRoot
             );
 
@@ -134,7 +177,11 @@ return [
         }
 
         try {
-            $package = lh_run_command(['sh', 'package-release.sh', $distDir], [], $repoRoot);
+            $package = lh_run_command(
+                ['sh', 'package-release.sh', $distDir],
+                ['LIGHTHOUSE_RELEASE_VERSION' => '0.1.0'],
+                $repoRoot
+            );
             lh_assert_same(0, $package['code'], $package['stderr']);
             lh_assert_contains('Created release bundle.', $package['stdout']);
 
@@ -162,6 +209,14 @@ return [
             $version = lh_run_command([$prefix . '/bin/lighthouse', 'version']);
             lh_assert_same(0, $version['code'], $version['stderr']);
             lh_assert_contains('Lighthouse 0.1.0', $version['stdout']);
+
+            $metadata = file_get_contents($prefix . '/share/lighthouse/metadata.env');
+
+            if ($metadata === false) {
+                throw new RuntimeException('Expected metadata.env to be created.');
+            }
+
+            lh_assert_contains('LIGHTHOUSE_REF_TYPE=tag', $metadata);
         } finally {
             lh_delete_tree($tempRoot);
         }

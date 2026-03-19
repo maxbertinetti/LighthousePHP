@@ -17,20 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Read release version
-        id: version
-        run: |
-          version="$(cat VERSION)"
-          tag="${GITHUB_REF_NAME}"
-
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-          if [ "$tag" != "$version" ]; then
-            printf '%s\n' "Tag $tag does not match VERSION $version" >&2
-            exit 1
-          fi
-
       - name: Verify PHP is available
         run: php -v
 
@@ -38,15 +24,19 @@ jobs:
         run: php lighthousephp test
 
       - name: Build release bundle
+        env:
+          LIGHTHOUSE_RELEASE_VERSION: ${{ github.ref_name }}
         run: ./package-release.sh dist
 
       - name: Build checksum
-        run: sha256sum "dist/lighthousephp-${{ steps.version.outputs.version }}.tar.gz" > "dist/lighthousephp-${{ steps.version.outputs.version }}.tar.gz.sha256"
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: sha256sum "dist/lighthousephp-$VERSION.tar.gz" > "dist/lighthousephp-$VERSION.tar.gz.sha256"
 
       - name: Publish GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ github.ref_name }}
         run: |
           archive="dist/lighthousephp-$VERSION.tar.gz"
           checksum="$archive.sha256"
