@@ -21,7 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/maxbertinetti/LighthousePHP/main/sc
 ```
 
 Install a branch snapshot explicitly:
-
+git
 ```sh
 curl -fsSL https://raw.githubusercontent.com/maxbertinetti/LighthousePHP/main/scripts/install.sh | sh -s -- maxbertinetti/LighthousePHP branch:main
 ```
