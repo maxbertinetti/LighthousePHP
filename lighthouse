@@ -10,6 +10,28 @@ read_metadata() {
     fi
 }
 
+effective_ref_type() {
+    printf '%s\n' "${LIGHTHOUSE_REF_TYPE:-branch}"
+}
+
+effective_ref() {
+    printf '%s\n' "${LIGHTHOUSE_REF:-main}"
+}
+
+effective_ref_selector() {
+    ref_type=$(effective_ref_type)
+    ref=$(effective_ref)
+
+    case "$ref_type" in
+        tag)
+            printf '%s\n' "tag:$ref"
+            ;;
+        *)
+            printf '%s\n' "branch:$ref"
+            ;;
+    esac
+}
+
 show_help() {
     printf '%s\n' "Lighthouse CLI"
     printf '\n'
@@ -64,7 +86,7 @@ remote_version() {
         return 1
     fi
 
-    ref=${LIGHTHOUSE_REF:-main}
+    ref=$(effective_ref)
     curl -fsSL "https://raw.githubusercontent.com/$LIGHTHOUSE_REPO/$ref/VERSION"
 }
 
@@ -100,18 +122,20 @@ self_update() {
         LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
         LIGHTHOUSE_INSTALL_URL="$install_url" \
         LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
-        LIGHTHOUSE_REF="${LIGHTHOUSE_REF:-main}" \
+        LIGHTHOUSE_REF="$(effective_ref_selector)" \
         sh -c 'curl -fsSL "$LIGHTHOUSE_INSTALL_URL" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
         return 0
     fi
 
     if [ -n "${LIGHTHOUSE_REPO:-}" ]; then
+        install_ref=$(effective_ref)
+        install_selector=$(effective_ref_selector)
         LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
         LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
         LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
         LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
-        LIGHTHOUSE_REF="${LIGHTHOUSE_REF:-main}" \
-        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/${LIGHTHOUSE_REF}/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
+        LIGHTHOUSE_REF="$install_selector" \
+        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/'"$install_ref"'/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
         return 0
     fi
 

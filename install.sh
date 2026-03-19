@@ -7,9 +7,11 @@ SHARE_DIR=${LIGHTHOUSE_SHARE_DIR:-"$PREFIX/share/lighthouse"}
 FRAMEWORK_DIR="$SHARE_DIR/current"
 SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 REPO_SLUG=${LIGHTHOUSE_REPO:-${1:-}}
-REPO_REF=${LIGHTHOUSE_REF:-${2:-main}}
+REPO_SELECTOR=${LIGHTHOUSE_REF:-${2:-main}}
 INSTALL_URL=${LIGHTHOUSE_INSTALL_URL:-}
 TEMP_DIR=
+REPO_REF=
+REPO_REF_TYPE=
 
 cleanup() {
     if [ -n "${TEMP_DIR:-}" ] && [ -d "$TEMP_DIR" ]; then
@@ -18,6 +20,34 @@ cleanup() {
 }
 
 trap cleanup EXIT INT TERM
+
+resolve_ref() {
+    selector=$1
+
+    case "$selector" in
+        branch:*)
+            REPO_REF_TYPE=branch
+            REPO_REF=${selector#branch:}
+            ;;
+        tag:*)
+            REPO_REF_TYPE=tag
+            REPO_REF=${selector#tag:}
+            ;;
+        version:*)
+            REPO_REF_TYPE=tag
+            REPO_REF=${selector#version:}
+            ;;
+        *)
+            REPO_REF_TYPE=branch
+            REPO_REF=$selector
+            ;;
+    esac
+
+    if [ -z "$REPO_REF" ]; then
+        printf '%s\n' "Repository ref cannot be empty." >&2
+        exit 1
+    fi
+}
 
 copy_framework_tree() {
     source_dir=$1
@@ -39,7 +69,13 @@ download_framework_tree() {
             exit 1
         fi
 
-        archive_url="https://github.com/$REPO_SLUG/archive/refs/heads/$REPO_REF.tar.gz"
+        archive_kind=heads
+
+        if [ "$REPO_REF_TYPE" = "tag" ]; then
+            archive_kind=tags
+        fi
+
+        archive_url="https://github.com/$REPO_SLUG/archive/refs/${archive_kind}/$REPO_REF.tar.gz"
     fi
 
     TEMP_DIR=$(mktemp -d)
@@ -57,6 +93,7 @@ write_metadata() {
 LIGHTHOUSE_INSTALLED_VERSION=$version
 LIGHTHOUSE_REPO=$REPO_SLUG
 LIGHTHOUSE_REF=$REPO_REF
+LIGHTHOUSE_REF_TYPE=$REPO_REF_TYPE
 LIGHTHOUSE_INSTALL_URL=$INSTALL_URL
 LIGHTHOUSE_PREFIX=$PREFIX
 LIGHTHOUSE_BIN_DIR=$BIN_DIR
@@ -80,6 +117,7 @@ EOF
 
 mkdir -p "$SHARE_DIR"
 rm -rf "$FRAMEWORK_DIR"
+resolve_ref "$REPO_SELECTOR"
 
 if [ -f "$SCRIPT_DIR/core/cli.php" ] && [ -f "$SCRIPT_DIR/lighthousephp" ] && [ -f "$SCRIPT_DIR/lighthouse" ]; then
     copy_framework_tree "$SCRIPT_DIR" "$FRAMEWORK_DIR"

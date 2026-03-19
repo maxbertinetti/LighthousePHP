@@ -76,7 +76,7 @@
 - Use GitHub release tags as the canonical Lighthouse version number
 - Remove manual `VERSION` drift by deriving installed version from the release/version source of truth
 - [x] Install Lighthouse globally from the GitHub repo via `curl | sh`
-- Support branch/tag/version selection during install
+- [x] Support branch/tag/version selection during install
 - [x] Add `lighthouse version`
 - [x] Add `lighthouse update-available`
 - [x] Add `lighthouse self-update`

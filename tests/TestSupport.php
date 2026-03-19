@@ -64,3 +64,38 @@ function lh_capture_cli(callable $callback): array
         'stderr' => $capturedStderr,
     ];
 }
+
+/**
+ * Run an external command for assertions.
+ *
+ * @param array<int, string> $command
+ * @param array<string, string> $environment
+ * @param string|null $cwd
+ * @return array{code:int, stdout:string, stderr:string}
+ */
+function lh_run_command(array $command, array $environment = [], ?string $cwd = null): array
+{
+    $descriptors = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w'],
+    ];
+
+    $process = proc_open($command, $descriptors, $pipes, $cwd, array_merge($_ENV, $environment));
+
+    if (!is_resource($process)) {
+        throw new RuntimeException('Unable to launch command.');
+    }
+
+    fclose($pipes[0]);
+    $stdout = stream_get_contents($pipes[1]) ?: '';
+    $stderr = stream_get_contents($pipes[2]) ?: '';
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+
+    return [
+        'code' => proc_close($process),
+        'stdout' => $stdout,
+        'stderr' => $stderr,
+    ];
+}
