@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../core/cli.php';
+require_once __DIR__ . '/../src/core/cli.php';
 
 return [
     lh_test('cli help prints usage', function (): void {
@@ -56,6 +56,10 @@ return [
             lh_assert_same(0, $result['code']);
             lh_assert_true(is_file($target . '/lighthousephp'), 'Expected scaffolded lighthousephp CLI script.');
             lh_assert_true(is_file($target . '/public/index.php'), 'Expected scaffolded public/index.php.');
+            lh_assert_true(is_dir($target . '/tests'), 'Expected an empty tests directory.');
+            lh_assert_true(!is_file($target . '/tests/bootstrap.php'), 'Did not expect framework tests in generated app.');
+            lh_assert_true(!is_dir($target . '/docs'), 'Did not expect framework docs in generated app.');
+            lh_assert_true(!is_dir($target . '/src'), 'Expected generated app to be flattened at project root.');
             lh_assert_contains('Created Lighthouse project', $result['stdout']);
         } finally {
             lh_delete_tree($tempRoot);
@@ -73,7 +77,7 @@ return [
 
         try {
             $result = lh_run_command(
-                ['sh', 'install.sh', 'maxbertinetti/LighthousePHP', 'tag:0.1.0'],
+                ['sh', 'scripts/install.sh', 'maxbertinetti/LighthousePHP', 'tag:0.1.0'],
                 [
                     'LIGHTHOUSE_PREFIX' => $prefix,
                     'LIGHTHOUSE_RELEASE_VERSION' => '0.1.0',
@@ -93,6 +97,10 @@ return [
             lh_assert_contains('LIGHTHOUSE_REPO=maxbertinetti/LighthousePHP', $metadata);
             lh_assert_contains('LIGHTHOUSE_REF=0.1.0', $metadata);
             lh_assert_contains('LIGHTHOUSE_REF_TYPE=tag', $metadata);
+            lh_assert_true(is_dir($prefix . '/share/lighthouse/current/src'), 'Expected framework src payload in install bundle.');
+            lh_assert_true(!is_dir($prefix . '/share/lighthouse/current/tests'), 'Did not expect framework tests in install bundle.');
+            lh_assert_true(!is_dir($prefix . '/share/lighthouse/current/docs'), 'Did not expect framework docs in install bundle.');
+            lh_assert_true(!is_dir($prefix . '/share/lighthouse/current/scripts'), 'Did not expect release scripts in install bundle.');
         } finally {
             lh_delete_tree($tempRoot);
         }
@@ -109,7 +117,7 @@ return [
 
         try {
             $result = lh_run_command(
-                ['sh', 'install.sh', 'maxbertinetti/LighthousePHP'],
+                ['sh', 'scripts/install.sh', 'maxbertinetti/LighthousePHP'],
                 [
                     'LIGHTHOUSE_PREFIX' => $prefix,
                     'LIGHTHOUSE_LATEST_RELEASE' => '0.1.0',
@@ -146,7 +154,7 @@ return [
 
         try {
             $install = lh_run_command(
-                ['sh', 'install.sh', 'maxbertinetti/LighthousePHP', 'version:0.1.0'],
+                ['sh', 'scripts/install.sh', 'maxbertinetti/LighthousePHP', 'version:0.1.0'],
                 [
                     'LIGHTHOUSE_PREFIX' => $prefix,
                     'LIGHTHOUSE_RELEASE_VERSION' => '0.1.0',
@@ -178,7 +186,7 @@ return [
 
         try {
             $package = lh_run_command(
-                ['sh', 'package-release.sh', $distDir],
+                ['sh', 'scripts/package-release.sh', $distDir],
                 ['LIGHTHOUSE_RELEASE_VERSION' => '0.1.0'],
                 $repoRoot
             );
@@ -189,7 +197,7 @@ return [
                 throw new RuntimeException('Unable to create installer dir.');
             }
 
-            if (!copy($repoRoot . '/install.sh', $installerDir . '/install.sh')) {
+            if (!copy($repoRoot . '/scripts/install.sh', $installerDir . '/install.sh')) {
                 throw new RuntimeException('Unable to copy install.sh.');
             }
 

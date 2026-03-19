@@ -3,10 +3,10 @@
 define('LIGHTHOUSE_ENV', 'testing');
 define('LIGHTHOUSE_TESTING', true);
 
-require_once __DIR__ . '/../core/test.php';
-require_once __DIR__ . '/../core/test_http.php';
-require_once __DIR__ . '/../core/migrate.php';
-require_once __DIR__ . '/../core/mail.php';
+require_once __DIR__ . '/../src/core/test.php';
+require_once __DIR__ . '/../src/core/test_http.php';
+require_once __DIR__ . '/../src/core/migrate.php';
+require_once __DIR__ . '/../src/core/mail.php';
 require_once __DIR__ . '/TestSupport.php';
 
 lh_delete_tree(__DIR__ . '/../data/mail');

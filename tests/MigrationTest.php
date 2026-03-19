@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../core/migrate.php';
-require_once __DIR__ . '/../core/cli.php';
+require_once __DIR__ . '/../src/core/migrate.php';
+require_once __DIR__ . '/../src/core/cli.php';
 
 /**
  * Write a migration pair into a temporary directory.

@@ -32,7 +32,7 @@ function lh_bootstrap(): void
  */
 function lh_resolve_page(string $uri): array
 {
-    $baseDir = realpath(__DIR__ . '/../pages');
+    $baseDir = realpath(lh_pages_dir());
 
     if ($baseDir === false) {
         lh_config_fail('Missing pages directory.');

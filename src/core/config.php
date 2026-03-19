@@ -10,7 +10,69 @@
 
 $lh_config = null;
 $lh_config_base_dir_override = null;
+$lh_project_root_override = null;
 $lh_env_override = null;
+
+/**
+ * Return whether the repository contains an application tree under src/.
+ *
+ * @param string $root
+ * @return bool
+ */
+function lh_has_src_app_root(string $root): bool
+{
+    $srcRoot = rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'src';
+    $required = ['config', 'core', 'migrations', 'pages', 'public', 'view'];
+
+    foreach ($required as $directory) {
+        if (!is_dir($srcRoot . DIRECTORY_SEPARATOR . $directory)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Return the repository/project root path.
+ *
+ * @return string
+ */
+function lh_project_root(): string
+{
+    global $lh_project_root_override;
+
+    if (is_string($lh_project_root_override) && $lh_project_root_override !== '') {
+        return $lh_project_root_override;
+    }
+
+    $coreRoot = dirname(__DIR__);
+
+    if (basename($coreRoot) === 'src') {
+        return dirname($coreRoot);
+    }
+
+    return $coreRoot;
+}
+
+/**
+ * Return the active application root.
+ *
+ * In the framework repository, this resolves to src/. In generated projects,
+ * it resolves to the project root.
+ *
+ * @return string
+ */
+function lh_app_root(): string
+{
+    $projectRoot = lh_project_root();
+
+    if (lh_has_src_app_root($projectRoot)) {
+        return $projectRoot . DIRECTORY_SEPARATOR . 'src';
+    }
+
+    return $projectRoot;
+}
 
 /**
  * Return the active config directory.
@@ -25,17 +87,27 @@ function lh_config_base_dir(): string
         return $lh_config_base_dir_override;
     }
 
-    return dirname(__DIR__) . '/config';
+    return lh_app_root() . '/config';
 }
 
-/**
- * Return the active project root for config-relative paths.
- *
- * @return string
- */
-function lh_project_root(): string
+function lh_pages_dir(): string
 {
-    return dirname(lh_config_base_dir());
+    return lh_app_root() . '/pages';
+}
+
+function lh_view_dir(): string
+{
+    return lh_app_root() . '/view';
+}
+
+function lh_public_dir(): string
+{
+    return lh_app_root() . '/public';
+}
+
+function lh_migrations_dir(): string
+{
+    return lh_app_root() . '/migrations';
 }
 
 /**
@@ -226,6 +298,19 @@ function lh_config_set_base_dir(?string $directory): void
     global $lh_config_base_dir_override;
 
     $lh_config_base_dir_override = $directory;
+}
+
+/**
+ * Override the active project root.
+ *
+ * @param string|null $root
+ * @return void
+ */
+function lh_project_root_set(?string $root): void
+{
+    global $lh_project_root_override;
+
+    $lh_project_root_override = $root;
 }
 
 /**

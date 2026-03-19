@@ -62,7 +62,7 @@ function lh_layout(string $content): string
     global $lh_layout_context;
     $layout = $lh_layout_context['layout'];
     $data = $lh_layout_context['data'];
-    $layoutPath = __DIR__ . '/../view/layouts/' . $layout . '.php';
+    $layoutPath = lh_view_dir() . '/layouts/' . $layout . '.php';
 
     if (!file_exists($layoutPath)) {
         trigger_error("Layout not found: {$layout}", E_USER_WARNING);
@@ -86,7 +86,7 @@ function lh_layout(string $content): string
  */
 function lh_partial(string $name, array $data = []): string
 {
-    $partialPath = __DIR__ . '/../view/partials/' . $name . '.php';
+    $partialPath = lh_view_dir() . '/partials/' . $name . '.php';
 
     if (!file_exists($partialPath)) {
         trigger_error("Partial not found: {$name}", E_USER_WARNING);

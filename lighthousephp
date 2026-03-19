@@ -1,6 +1,12 @@
 #!/usr/bin/env php
 <?php
 
-require __DIR__ . '/core/cli.php';
+$cliPath = __DIR__ . '/core/cli.php';
+
+if (!is_file($cliPath)) {
+    $cliPath = __DIR__ . '/src/core/cli.php';
+}
+
+require $cliPath;
 
 exit(lh_cli_main($argv));

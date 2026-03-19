@@ -2,7 +2,8 @@
 set -eu
 
 SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-OUTPUT_DIR=${1:-"$SCRIPT_DIR/dist"}
+REPO_ROOT=$(dirname "$SCRIPT_DIR")
+OUTPUT_DIR=${1:-"$REPO_ROOT/dist"}
 STAGING_DIR=
 VERSION=
 
@@ -20,15 +21,15 @@ resolve_version() {
         return 0
     fi
 
-    if command -v git >/dev/null 2>&1 && [ -d "$SCRIPT_DIR/.git" ]; then
-        version=$(git -C "$SCRIPT_DIR" describe --tags --exact-match 2>/dev/null || true)
+    if command -v git >/dev/null 2>&1 && [ -d "$REPO_ROOT/.git" ]; then
+        version=$(git -C "$REPO_ROOT" describe --tags --exact-match 2>/dev/null || true)
 
         if [ -n "$version" ]; then
             printf '%s\n' "$version"
             return 0
         fi
 
-        version=$(git -C "$SCRIPT_DIR" describe --tags --always --dirty 2>/dev/null || true)
+        version=$(git -C "$REPO_ROOT" describe --tags --always --dirty 2>/dev/null || true)
 
         if [ -n "$version" ]; then
             printf '%s\n' "$version"
@@ -48,12 +49,11 @@ ARCHIVE_PATH="$OUTPUT_DIR/lighthousephp-$VERSION.tar.gz"
 
 mkdir -p "$PACKAGE_ROOT"
 
-for path in .gitignore LICENSE README.md config core docs migrations pages public tests view lighthouse lighthousephp remove.sh install.sh package-release.sh; do
-    cp -R "$SCRIPT_DIR/$path" "$PACKAGE_ROOT/$path"
+for path in LICENSE README.md lighthouse lighthousephp src; do
+    cp -R "$REPO_ROOT/$path" "$PACKAGE_ROOT/$path"
 done
 
 chmod 0755 "$PACKAGE_ROOT/lighthouse" "$PACKAGE_ROOT/lighthousephp"
-chmod 0755 "$PACKAGE_ROOT/remove.sh" "$PACKAGE_ROOT/install.sh" "$PACKAGE_ROOT/package-release.sh"
 
 tar -czf "$ARCHIVE_PATH" -C "$STAGING_DIR" lighthousephp
 

@@ -59,7 +59,19 @@ function lh_cli_root(): string
         return $lh_cli_root_override;
     }
 
-    return dirname(__DIR__);
+    return dirname(dirname(__DIR__));
+}
+
+/**
+ * Return the active application root for CLI operations.
+ *
+ * @return string
+ */
+function lh_cli_app_root(): string
+{
+    return lh_has_src_app_root(lh_cli_root())
+        ? lh_cli_root() . DIRECTORY_SEPARATOR . 'src'
+        : lh_cli_root();
 }
 
 /**
@@ -73,7 +85,8 @@ function lh_cli_set_root(?string $root): void
     global $lh_cli_root_override;
 
     $lh_cli_root_override = $root;
-    lh_config_set_base_dir($root === null ? null : rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'config');
+    lh_project_root_set($root);
+    lh_config_set_base_dir($root === null ? null : rtrim(lh_cli_app_root(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'config');
 }
 
 /**
@@ -284,14 +297,6 @@ function lh_cli_command_new(array $options, array $args): int
 
     $copyMap = [
         '.gitignore',
-        'config',
-        'core',
-        'docs',
-        'migrations',
-        'pages',
-        'public',
-        'tests',
-        'view',
         'lighthousephp',
     ];
 
@@ -299,7 +304,11 @@ function lh_cli_command_new(array $options, array $args): int
         lh_cli_copy_tree(lh_cli_root() . DIRECTORY_SEPARATOR . $relativePath, $targetPath . DIRECTORY_SEPARATOR . $relativePath);
     }
 
-    foreach (['cache', 'data', 'db'] as $directory) {
+    foreach (['config', 'core', 'migrations', 'pages', 'public', 'view'] as $relativePath) {
+        lh_cli_copy_tree(lh_cli_app_root() . DIRECTORY_SEPARATOR . $relativePath, $targetPath . DIRECTORY_SEPARATOR . $relativePath);
+    }
+
+    foreach (['cache', 'data', 'db', 'tests'] as $directory) {
         $path = $targetPath . DIRECTORY_SEPARATOR . $directory;
 
         if (!is_dir($path)) {
@@ -364,8 +373,8 @@ function lh_cli_command_serve(array $options): int
 {
     $host = (string) ($options['host'] ?? '127.0.0.1');
     $port = (string) ($options['port'] ?? '8000');
-    $router = lh_cli_root() . '/public/router.php';
-    $publicDir = lh_cli_root() . '/public';
+    $router = lh_cli_app_root() . '/public/router.php';
+    $publicDir = lh_cli_app_root() . '/public';
     $command = [
         lh_cli_php_binary(),
         '-S',
@@ -489,6 +498,7 @@ function lh_cli_command_migrate(array $options, array $args): int
         lh_db_disconnect();
         lh_config_reset();
         lh_config_set_base_dir(null);
+        lh_project_root_set(null);
         lh_env_set_override(null);
     }
 }

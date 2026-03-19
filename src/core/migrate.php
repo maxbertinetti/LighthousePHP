@@ -15,7 +15,11 @@ require_once __DIR__ . '/db.php';
  */
 function lh_migration_dir(?string $root = null): string
 {
-    $base = $root ?? dirname(__DIR__);
+    $base = $root ?? lh_app_root();
+
+    if ($root !== null && lh_has_src_app_root($root)) {
+        $base = rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'src';
+    }
 
     return rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'migrations';
 }
@@ -426,8 +430,9 @@ function lh_migration_connect(string $environment = 'development', ?string $root
 {
     putenv("APP_ENV={$environment}");
     lh_env_set_override($environment);
-    $projectRoot = $root ?? dirname(__DIR__);
-    lh_config_set_base_dir(rtrim($projectRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'config');
+    $projectRoot = $root ?? lh_project_root();
+    lh_project_root_set($projectRoot);
+    lh_config_set_base_dir(rtrim(lh_app_root(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'config');
     lh_config_reset();
     lh_db_disconnect();
     lh_load_config();

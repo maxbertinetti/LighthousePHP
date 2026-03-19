@@ -86,22 +86,42 @@
 - [x] Add release packaging for installer-compatible bundles
 - [x] Add GitHub release publication workflow
 
-## Phase 11 — Cache System
+## Phase 11 — Framework / App Separation
+- [x] Move framework-owned application directories under `src/`
+- [x] Move release and development shell tooling under `scripts/`
+- [x] Keep `tests/` at the repository root for framework-only tests
+- [x] Keep `docs/` outside the application runtime and install payload
+- [x] Keep `lighthouse` and `lighthousephp` at the repository root
+- [x] Introduce a canonical app-root resolver
+- [x] Treat `src/` as the app root when the framework repository is running locally
+- [x] Treat the project root as the app root in generated Lighthouse applications
+- [x] Refactor runtime path resolution to use the canonical app root
+- [x] Refactor CLI path resolution to use the canonical app root
+- [x] Refactor HTTP entrypoints to use the canonical app root
+- [x] Refactor migration/config/layout/page discovery to use the canonical app root
+- [x] Ensure `lighthouse new` copies `src/*` into the generated app root as flattened directories
+- [x] Ensure `lighthouse new` does not copy framework tests into generated apps, but create an empty test directory
+- [x] Ensure install payloads exclude framework docs, framework tests, and release scripts
+- [x] Keep generated apps autosufficient while preserving `core/` as framework-managed code
+- [x] Document that `core/` is framework-owned and should not be modified in user apps
+- [x] Verify framework tests continue to run correctly against `src/` as the framework app root
+
+## Phase 12 — Cache System
 - File cache engine
 - TTL support
 - Tag system
 - Invalidation API
 
-## Phase 12 — Lighthouse Checker
+## Phase 13 — Lighthouse Checker
 - Audit integration
 - Report output
 
-## Phase 13 — Preflight
+## Phase 14 — Preflight
 - Environment checks
 - Security validation
 - Production readiness
 
-## Phase 14 — Hardening
+## Phase 15 — Hardening
 - CSP tuning
 - Performance validation
 - Edge cases handling

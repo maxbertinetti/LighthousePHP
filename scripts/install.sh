@@ -6,6 +6,7 @@ BIN_DIR=${LIGHTHOUSE_BIN_DIR:-"$PREFIX/bin"}
 SHARE_DIR=${LIGHTHOUSE_SHARE_DIR:-"$PREFIX/share/lighthouse"}
 FRAMEWORK_DIR="$SHARE_DIR/current"
 SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+REPO_ROOT=$(dirname "$SCRIPT_DIR")
 REPO_SLUG=${LIGHTHOUSE_REPO:-${1:-}}
 REPO_SELECTOR=${LIGHTHOUSE_REF:-${2:-}}
 INSTALL_URL=${LIGHTHOUSE_INSTALL_URL:-}
@@ -99,8 +100,8 @@ resolve_version() {
         return 0
     fi
 
-    if command -v git >/dev/null 2>&1 && [ -d "$SCRIPT_DIR/.git" ]; then
-        version=$(git -C "$SCRIPT_DIR" describe --tags --always --dirty 2>/dev/null || true)
+    if command -v git >/dev/null 2>&1 && [ -d "$REPO_ROOT/.git" ]; then
+        version=$(git -C "$REPO_ROOT" describe --tags --always --dirty 2>/dev/null || true)
 
         if [ -n "$version" ]; then
             printf '%s\n' "$version"
@@ -131,7 +132,7 @@ copy_framework_tree() {
 
     mkdir -p "$target_dir"
 
-    for path in .gitignore LICENSE README.md config core docs migrations pages public tests view lighthouse lighthousephp remove.sh install.sh; do
+    for path in LICENSE README.md lighthouse lighthousephp src; do
         cp -R "$source_dir/$path" "$target_dir/$path"
     done
 }
@@ -184,14 +185,13 @@ resolve_ref "$REPO_SELECTOR"
 BUNDLE_ASSET_NAME=$(bundle_asset_name)
 RESOLVED_VERSION=$(resolve_version)
 
-if [ -f "$SCRIPT_DIR/core/cli.php" ] && [ -f "$SCRIPT_DIR/lighthousephp" ] && [ -f "$SCRIPT_DIR/lighthouse" ]; then
-    copy_framework_tree "$SCRIPT_DIR" "$FRAMEWORK_DIR"
+if [ -f "$REPO_ROOT/src/core/cli.php" ] && [ -f "$REPO_ROOT/lighthousephp" ] && [ -f "$REPO_ROOT/lighthouse" ]; then
+    copy_framework_tree "$REPO_ROOT" "$FRAMEWORK_DIR"
 else
     download_framework_tree
 fi
 
 chmod 0755 "$FRAMEWORK_DIR/lighthouse" "$FRAMEWORK_DIR/lighthousephp"
-chmod 0755 "$FRAMEWORK_DIR/remove.sh" "$FRAMEWORK_DIR/install.sh"
 write_metadata
 install_wrapper
 

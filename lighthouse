@@ -65,6 +65,11 @@ find_project_root() {
             return 0
         fi
 
+        if [ -f "$current_dir/lighthousephp" ] && [ -d "$current_dir/src/core" ] && [ -d "$current_dir/src/public" ] && [ -d "$current_dir/src/config" ]; then
+            printf '%s\n' "$current_dir"
+            return 0
+        fi
+
         current_dir=$(dirname "$current_dir")
     done
 
@@ -146,7 +151,7 @@ self_update() {
         LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
         LIGHTHOUSE_REPO="${LIGHTHOUSE_REPO:-}" \
         LIGHTHOUSE_REF="$install_selector" \
-        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/'"$installer_ref"'/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
+        sh -c 'curl -fsSL "https://raw.githubusercontent.com/${LIGHTHOUSE_REPO}/'"$installer_ref"'/scripts/install.sh" | sh -s -- "$LIGHTHOUSE_REPO" "$LIGHTHOUSE_REF"'
         return 0
     fi
 
@@ -155,10 +160,16 @@ self_update() {
 }
 
 uninstall_lighthouse() {
-    LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}" \
-    LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}" \
-    LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}" \
-    exec "$LIGHTHOUSE_HOME/remove.sh"
+    LIGHTHOUSE_PREFIX="${LIGHTHOUSE_PREFIX:-$HOME/.local}"
+    LIGHTHOUSE_BIN_DIR="${LIGHTHOUSE_BIN_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/bin}"
+    LIGHTHOUSE_SHARE_DIR="${LIGHTHOUSE_SHARE_DIR:-${LIGHTHOUSE_PREFIX:-$HOME/.local}/share/lighthouse}"
+
+    rm -f "$LIGHTHOUSE_BIN_DIR/lighthouse"
+    rm -rf "$LIGHTHOUSE_SHARE_DIR"
+
+    printf '%s\n' "Lighthouse removed."
+    printf '%s\n' "  Removed binary: $LIGHTHOUSE_BIN_DIR/lighthouse"
+    printf '%s\n' "  Removed data dir: $LIGHTHOUSE_SHARE_DIR"
 }
 
 command_name=${1:-help}
