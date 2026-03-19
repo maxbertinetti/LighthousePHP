@@ -82,8 +82,8 @@
 - [x] Add `lighthouse self-update`
 - [x] Add `lighthouse uninstall`
 - [x] Persist install metadata for update and removal workflows
-- Download packaged framework bundles from GitHub releases instead of relying on a local checkout
-- Add release packaging for installer-compatible bundles
+- [x] Download packaged framework bundles from GitHub releases instead of relying on a local checkout
+- [x] Add release packaging for installer-compatible bundles
 - Add GitHub release publication workflow
 
 ## Phase 11 — Cache System

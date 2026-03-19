@@ -12,6 +12,7 @@ INSTALL_URL=${LIGHTHOUSE_INSTALL_URL:-}
 TEMP_DIR=
 REPO_REF=
 REPO_REF_TYPE=
+BUNDLE_ASSET_NAME=
 
 cleanup() {
     if [ -n "${TEMP_DIR:-}" ] && [ -d "$TEMP_DIR" ]; then
@@ -49,6 +50,24 @@ resolve_ref() {
     fi
 }
 
+bundle_asset_name() {
+    printf '%s\n' "lighthousephp-$REPO_REF.tar.gz"
+}
+
+default_download_url() {
+    if [ -z "$REPO_SLUG" ]; then
+        printf '%s\n' "Set LIGHTHOUSE_REPO=owner/repo or pass 'owner/repo' to install.sh when installing from GitHub." >&2
+        exit 1
+    fi
+
+    if [ "$REPO_REF_TYPE" = "tag" ]; then
+        printf '%s\n' "https://github.com/$REPO_SLUG/releases/download/$REPO_REF/$BUNDLE_ASSET_NAME"
+        return 0
+    fi
+
+    printf '%s\n' "https://github.com/$REPO_SLUG/archive/refs/heads/$REPO_REF.tar.gz"
+}
+
 copy_framework_tree() {
     source_dir=$1
     target_dir=$2
@@ -64,18 +83,7 @@ download_framework_tree() {
     archive_url=${LIGHTHOUSE_DOWNLOAD_URL:-}
 
     if [ -z "$archive_url" ]; then
-        if [ -z "$REPO_SLUG" ]; then
-            printf '%s\n' "Set LIGHTHOUSE_REPO=owner/repo or pass 'owner/repo' to install.sh when installing from GitHub." >&2
-            exit 1
-        fi
-
-        archive_kind=heads
-
-        if [ "$REPO_REF_TYPE" = "tag" ]; then
-            archive_kind=tags
-        fi
-
-        archive_url="https://github.com/$REPO_SLUG/archive/refs/${archive_kind}/$REPO_REF.tar.gz"
+        archive_url=$(default_download_url)
     fi
 
     TEMP_DIR=$(mktemp -d)
@@ -118,6 +126,7 @@ EOF
 mkdir -p "$SHARE_DIR"
 rm -rf "$FRAMEWORK_DIR"
 resolve_ref "$REPO_SELECTOR"
+BUNDLE_ASSET_NAME=$(bundle_asset_name)
 
 if [ -f "$SCRIPT_DIR/core/cli.php" ] && [ -f "$SCRIPT_DIR/lighthousephp" ] && [ -f "$SCRIPT_DIR/lighthouse" ]; then
     copy_framework_tree "$SCRIPT_DIR" "$FRAMEWORK_DIR"

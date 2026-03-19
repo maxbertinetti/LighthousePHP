@@ -121,4 +121,49 @@ return [
             lh_delete_tree($tempRoot);
         }
     }),
+
+    lh_test('release bundle installs through standalone installer script', function (): void {
+        $tempRoot = sys_get_temp_dir() . '/lighthouse-bundle-' . bin2hex(random_bytes(4));
+        $repoRoot = dirname(__DIR__);
+        $distDir = $tempRoot . '/dist';
+        $installerDir = $tempRoot . '/installer';
+        $prefix = $tempRoot . '/prefix';
+
+        if (!mkdir($tempRoot, 0777, true) && !is_dir($tempRoot)) {
+            throw new RuntimeException('Unable to create temp root.');
+        }
+
+        try {
+            $package = lh_run_command(['sh', 'package-release.sh', $distDir], [], $repoRoot);
+            lh_assert_same(0, $package['code'], $package['stderr']);
+            lh_assert_contains('Created release bundle.', $package['stdout']);
+
+            if (!mkdir($installerDir, 0777, true) && !is_dir($installerDir)) {
+                throw new RuntimeException('Unable to create installer dir.');
+            }
+
+            if (!copy($repoRoot . '/install.sh', $installerDir . '/install.sh')) {
+                throw new RuntimeException('Unable to copy install.sh.');
+            }
+
+            $archiveUrl = 'file://' . $distDir . '/lighthousephp-0.1.0.tar.gz';
+            $install = lh_run_command(
+                ['sh', 'install.sh', 'maxbertinetti/LighthousePHP', 'tag:0.1.0'],
+                [
+                    'LIGHTHOUSE_PREFIX' => $prefix,
+                    'LIGHTHOUSE_DOWNLOAD_URL' => $archiveUrl,
+                ],
+                $installerDir
+            );
+
+            lh_assert_same(0, $install['code'], $install['stderr']);
+            lh_assert_contains('Lighthouse installed.', $install['stdout']);
+
+            $version = lh_run_command([$prefix . '/bin/lighthouse', 'version']);
+            lh_assert_same(0, $version['code'], $version['stderr']);
+            lh_assert_contains('Lighthouse 0.1.0', $version['stdout']);
+        } finally {
+            lh_delete_tree($tempRoot);
+        }
+    }),
 ];
