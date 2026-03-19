@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read release version
+        id: version
+        run: |
+          version="$(cat VERSION)"
+          tag="${GITHUB_REF_NAME}"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+          if [ "$tag" != "$version" ]; then
+            printf '%s\n' "Tag $tag does not match VERSION $version" >&2
+            exit 1
+          fi
+
+      - name: Verify PHP is available
+        run: php -v
+
+      - name: Run test suite
+        run: php lighthousephp test
+
+      - name: Build release bundle
+        run: ./package-release.sh dist
+
+      - name: Build checksum
+        run: sha256sum "dist/lighthousephp-${{ steps.version.outputs.version }}.tar.gz" > "dist/lighthousephp-${{ steps.version.outputs.version }}.tar.gz.sha256"
+
+      - name: Publish GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          archive="dist/lighthousephp-$VERSION.tar.gz"
+          checksum="$archive.sha256"
+
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            gh release upload "$VERSION" "$archive" "$checksum" --clobber
+            exit 0
+          fi
+
+          gh release create "$VERSION" "$archive" "$checksum" \
+            --title "LighthousePHP $VERSION" \
+            --generate-notes
