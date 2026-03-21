@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/installation/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/rationale/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/blog/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/guide/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/guide/database/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+    <url>
+         <loc>https://maxbertinetti.github.io/LighthousePHP/guide/routing/</loc>
+         <lastmod>2026-03-21</lastmod>
+    </url>
+</urlset>
