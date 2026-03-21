@@ -4,6 +4,17 @@ site_url: https://maxbertinetti.github.io/LighthousePHP
 repo_url: https://github.com/maxbertinetti/LighthousePHP
 repo_name: lighthousephp
 
+nav:
+  - Home: index.md
+  - Rationale: rationale.md
+  - Installation: installation.md
+  - Docs:
+    - guide/index.md
+    - Routing: guide/routing.md
+    - Database: guide/database.md
+  - Blog:
+    - blog/index.md
+
 theme:
   name: material
   language: en
@@ -35,6 +46,9 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
+
+markdown_extensions:
+  - attr_list
 
 plugins:
   - social

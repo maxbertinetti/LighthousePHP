@@ -24,12 +24,8 @@ lh_set_data([
             Phase 6 has started with session authentication, CSRF-protected forms, and a
             dashboard flow you can build on.
         </p>
-        <p>
-            <a href="/auth/login">Open the login page</a> or go straight to the
-            <a href="/dashboard/home">dashboard</a>.
-        </p>
     </article>
     <figure>
-        <img src="/assets/img/Logo.png" alt="Lighthouse logo">
+        <img src="/assets/img/Logo.webp" alt="Lighthouse logo">
     </figure>
 </section>

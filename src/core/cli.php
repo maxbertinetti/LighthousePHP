@@ -69,9 +69,11 @@ function lh_cli_root(): string
  */
 function lh_cli_app_root(): string
 {
-    return lh_has_src_app_root(lh_cli_root())
-        ? lh_cli_root() . DIRECTORY_SEPARATOR . 'src'
-        : lh_cli_root();
+    $root = getcwd() ?: lh_cli_root();
+
+    return lh_has_src_app_root($root)
+        ? $root . DIRECTORY_SEPARATOR . 'src'
+        : $root;
 }
 
 /**
@@ -373,6 +375,7 @@ function lh_cli_command_serve(array $options): int
 {
     $host = (string) ($options['host'] ?? '127.0.0.1');
     $port = (string) ($options['port'] ?? '8000');
+    $appRoot = lh_has_src_app_root(getcwd()) ? lh_cli_app_root() : getcwd();
     $router = lh_cli_app_root() . '/public/router.php';
     $publicDir = lh_cli_app_root() . '/public';
     $command = [

@@ -1,6 +1,6 @@
 # LighthousePHP
 
-![LighthousePHP Logo](src/public/assets/img/Logo.png)
+![LighthousePHP Logo](src/public/assets/img/Logo.webp)
 
 ## Introduction
 
